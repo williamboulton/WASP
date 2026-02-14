@@ -1,0 +1,20 @@
+# Build output
+build/
+*.exe
+*.obj
+*.pdb
+*.ilk
+
+# Visual Studio temporary files
+*.vc.db
+*.vc.opendb
+.vs/
+*.user
+
+# Intermediate files
+*.log
+Debug/
+Release/
+x64/
+x86/
+
