@@ -9,6 +9,15 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class handles messages for the Metrics Websocket.
+ * The ObjectMapper class from jackson is used to deserialize
+ * the websocket  payload into the MetricMessage class. It
+ * validates payloads coming in follow the JSON structure
+ * required, and sends a payload back indicating if a field
+ * is malformed or non-existent.
+ * @author Patrick Muller
+ */
 @Component
 public class MetricsWebSocketHandler extends TextWebSocketHandler {
   private final ObjectMapper objectMapper;
@@ -24,6 +33,14 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
   }
 */
 
+  /**
+   * Send an error message to the client if an
+   * error exists in their payload
+   * @param session Current socket session
+   * @param errorCode Error tile
+   * @param message Summary of error
+   * @throws Exception Throw Exception if field malformed
+   */
   private void sendError(WebSocketSession session,
                          String errorCode,
                          String message) throws Exception {
@@ -38,6 +55,10 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
     session.sendMessage(new TextMessage(json));
   }
 
+  /**
+   * Validate the payload has all the required fields
+   * @param message Deserialized Json payload object
+   */
   private void validateMetricMessage(MetricMessage message) {
 
     if (message == null) {
@@ -67,7 +88,15 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
     }
   }
 
-
+  /**
+   * This method is called upon when a message is received
+   * on the metrics web socket. It deserializes the message
+   * into the MetricMessage class and calls validateMetricMessage.
+   * If any errors are detected it invokes sendError.
+   * @param session Current socket session
+   * @param message Incoming socket message
+   * @throws Exception Throws exception upon error in formatting
+   */
   @Override
   protected void handleTextMessage(WebSocketSession session,
                                    TextMessage message) throws Exception {

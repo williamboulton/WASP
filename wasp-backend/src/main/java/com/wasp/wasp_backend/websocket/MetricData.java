@@ -1,5 +1,9 @@
 package com.wasp.wasp_backend.websocket;
 
+/**
+ * Data from the "data" field in the json payload are mapped to this class
+ * @author Patrick Muller
+ */
 public class MetricData {
 
   private Double cpu;

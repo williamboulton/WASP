@@ -1,5 +1,10 @@
 package com.wasp.wasp_backend.websocket;
 
+/**
+ * Payloads from the metrics websocket are deserialized and stored
+ * into an instance of this class.
+ * @author Patrick Muller
+ */
 public class MetricMessage {
 
   private String type;
