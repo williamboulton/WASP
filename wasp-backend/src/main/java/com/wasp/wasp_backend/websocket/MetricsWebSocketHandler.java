@@ -1,13 +1,27 @@
 package com.wasp.wasp_backend.websocket;
 
+import com.wasp.wasp_backend.dto.CpuCoreData;
+import com.wasp.wasp_backend.dto.CpuData;
+import com.wasp.wasp_backend.dto.DiskData;
+import com.wasp.wasp_backend.dto.MemoryData;
+import com.wasp.wasp_backend.exception.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class handles messages for the Metrics Websocket.
@@ -16,29 +30,54 @@ import java.util.Map;
  * validates payloads coming in follow the JSON structure
  * required, and sends a payload back indicating if a field
  * is malformed or non-existent.
+ *
  * @author Patrick Muller
  */
 @Component
 public class MetricsWebSocketHandler extends TextWebSocketHandler {
   private final ObjectMapper objectMapper;
+  private final Set<WebSocketSession> sessions =
+    ConcurrentHashMap.newKeySet();
+
+  private static final Logger log =
+    LoggerFactory.getLogger(MetricsWebSocketHandler.class);
 
   public MetricsWebSocketHandler(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 
-/*
   @Override
   public void afterConnectionEstablished(WebSocketSession session) {
-    System.out.println("C++ service connected: " + session.getId());
+    sessions.add(session);
+    System.out.println("Connected: " + session.getId());
   }
-*/
+
+  @Override
+  public void afterConnectionClosed(
+    WebSocketSession session, CloseStatus status) {
+    sessions.remove(session);
+    System.out.println("Disconnected: " + session.getId());
+  }
+
+  public void sendToAll(String json) {
+    for (WebSocketSession session : sessions) {
+      if (session.isOpen()) {
+        try {
+          session.sendMessage(new TextMessage(json));
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
 
   /**
    * Send an error message to the client if an
    * error exists in their payload
-   * @param session Current socket session
+   *
+   * @param session   Current socket session
    * @param errorCode Error tile
-   * @param message Summary of error
+   * @param message   Summary of error
    * @throws Exception Throw Exception if field malformed
    */
   private void sendError(WebSocketSession session,
@@ -56,35 +95,113 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
   }
 
   /**
-   * Validate the payload has all the required fields
-   * @param message Deserialized Json payload object
+   * This method relays the JSON payload to all currently connected clients
+   *
+   * @param rawJson
+   * @author Patrick Muller
    */
-  private void validateMetricMessage(MetricMessage message) {
+  private void relayToFrontend(String rawJson) {
+    sendToAll(rawJson);
+  }
 
-    if (message == null) {
-      throw new IllegalArgumentException("Message cannot be null");
+  /**
+   *
+   * @param node
+   * @param name
+   * @throws JsonProcessingException
+   */
+  private void requireObject(JsonNode node, String name)
+    throws JsonProcessingException {
+    if (node == null || node.isNull() || !node.isObject()) {
+      throw new JsonProcessingException(name + " must be a JSON object") {
+      };
+    }
+  }
+
+  private void requireArray(JsonNode node, String name)
+    throws JsonProcessingException {
+    if (node == null || node.isNull() || !node.isArray()) {
+      throw new JsonProcessingException(name + " must be a JSON array") {
+      };
+    }
+  }
+
+  private void requireFields(JsonNode node, String objectName, String... fields)
+    throws JsonProcessingException {
+    for (String field : fields) {
+      if (!node.has(field) || node.get(field).isNull()) {
+        throw new JsonProcessingException(
+          "Missing required field '" + field + "' in " + objectName
+        ) {
+        };
+      }
+    }
+  }
+
+  /**
+   * Validate the incoming JSON payload. Enforce all fields are present
+   * and in the form that is expected.
+   *
+   * @param cpuData     Cpu field
+   * @param cpuCoreData Cpu core field
+   * @param memoryData  Memory field
+   * @param diskData    Disk field
+   */
+  private void validateMetricData(JsonNode cpuData,
+                                  JsonNode cpuCoreData,
+                                  JsonNode memoryData,
+                                  JsonNode diskData)
+    throws JsonProcessingException {
+
+    requireObject(cpuData, "cpu");
+    System.out.println("this is cpuData" + cpuData);
+    requireFields(cpuData, "cpu",
+      "cpu_mhz",
+      "cpu_usage_percent",
+      "system_responsiveness_percent",
+      "timestamp"
+    );
+
+    // ---- CPU CORES (array of objects) ----
+    requireArray(cpuCoreData, "cpu_cores");
+    if (cpuCoreData.size() == 0) {
+      throw new JsonProcessingException("cpu_cores array must not be empty") {
+      };
     }
 
-    if (message.getType() == null || message.getType().isBlank()) {
-      throw new IllegalArgumentException("Field 'type' is required");
+    for (int i = 0; i < cpuCoreData.size(); i++) {
+      JsonNode core = cpuCoreData.get(i);
+      requireObject(core, "cpu_cores[" + i + "]");
+      requireFields(core, "cpu_cores[" + i + "]",
+        "core_index",
+        "cpu_usage_percent"
+      );
     }
 
-    if (message.getSource() == null || message.getSource().isBlank()) {
-      throw new IllegalArgumentException("Field 'source' is required");
+    // ---- MEMORY (single object) ----
+    requireObject(memoryData, "memory");
+    requireFields(memoryData, "memory",
+      "total_bytes",
+      "used_bytes",
+      "free_bytes"
+    );
+
+    // ---- DISK (array of objects) ----
+    requireArray(diskData, "disk");
+    if (diskData.size() == 0) {
+      throw new JsonProcessingException("disk array must not be empty") {
+      };
     }
 
-    if (message.getData() == null) {
-      throw new IllegalArgumentException("Field 'data' is required");
-    }
-
-    MetricData data = message.getData();
-
-    if (data.getCpu() == null) {
-      throw new IllegalArgumentException("Field 'data.cpu' is required");
-    }
-
-    if (data.getMemory() == null) {
-      throw new IllegalArgumentException("Field 'data.memory' is required");
+    for (int i = 0; i < diskData.size(); i++) {
+      JsonNode disk = diskData.get(i);
+      requireObject(disk, "disk[" + i + "]");
+      requireFields(disk, "disk[" + i + "]",
+        "mount",
+        "total_bytes",
+        "used_bytes",
+        "free_bytes"
+      );
     }
   }
 
@@ -93,6 +210,7 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
    * on the metrics web socket. It deserializes the message
    * into the MetricMessage class and calls validateMetricMessage.
    * If any errors are detected it invokes sendError.
+   *
    * @param session Current socket session
    * @param message Incoming socket message
    * @throws Exception Throws exception upon error in formatting
@@ -101,22 +219,44 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
   protected void handleTextMessage(WebSocketSession session,
                                    TextMessage message) throws Exception {
 
+    String rawJson = message.getPayload();
+
     try {
-      MetricMessage metricMessage =
-        objectMapper.readValue(message.getPayload(), MetricMessage.class);
+      // This method will relay deserialized JSON payload directly to frontend
+      relayToFrontend(rawJson);
 
-      validateMetricMessage(metricMessage);
+      JsonNode root = objectMapper.readTree(rawJson);
 
-      // Safe to use now
-      System.out.println("CPU: " + metricMessage.getData().getCpu());
-      System.out.println("Memory: " + metricMessage.getData().getMemory());
+      JsonNode cpuNode = root.path("cpu");
+      JsonNode cpuCoresNode = root.path("cpu_cores");
+      JsonNode memoryNode = root.path("memory");
+      JsonNode diskNode = root.path("disk");
+
+      // validation occurs after relay to reduce overhead
+      validateMetricData(cpuNode, cpuCoresNode, memoryNode, diskNode);
+
+      CpuData cpu = objectMapper.treeToValue(cpuNode, CpuData.class);
+
+      List<CpuCoreData> cpuCores =
+        objectMapper.convertValue(cpuCoresNode,
+          new TypeReference<>() {
+          });
+
+      MemoryData memory = objectMapper.treeToValue(memoryNode, MemoryData.class);
+
+      List<DiskData> disk = objectMapper.convertValue(diskNode,
+        new TypeReference<>() {
+        });
+
+//      metricsAggregationService.ingest(cpu, cpuCores, memory, disk);
 
     } catch (IllegalArgumentException e) {
+      e.printStackTrace();
       sendError(session, "INVALID_FORMAT", e.getMessage());
     } catch (Exception e) {
+      e.printStackTrace();
       sendError(session, "INVALID_JSON", "Malformed JSON payload");
     }
   }
-
 
 }

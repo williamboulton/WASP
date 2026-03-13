@@ -1,0 +1,3 @@
+frontend:
+  websocket:
+    url: ws://localhost:3000/ws/metrics
