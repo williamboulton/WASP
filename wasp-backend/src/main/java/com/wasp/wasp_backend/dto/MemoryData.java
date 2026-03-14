@@ -8,10 +8,10 @@ import java.sql.Timestamp;
 
 @ToString
 public class MemoryData {
-  @Getter @Setter long total_bytes;
-  @Getter @Setter long free_bytes;
-  @Getter @Setter long used_bytes;
-  @Getter @Setter int memory_usage_percent;
-  @Getter @Setter long page_fault_count;
-  @Getter @Setter String timestamp;
+  @Getter @Setter private long total_bytes;
+  @Getter @Setter private long free_bytes;
+  @Getter @Setter private long used_bytes;
+  @Getter @Setter private int memory_usage_percent;
+  @Getter @Setter private long page_fault_count;
+  @Getter @Setter private String timestamp;
 }

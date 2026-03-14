@@ -5,6 +5,7 @@ import com.wasp.wasp_backend.dto.CpuData;
 import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
 import com.wasp.wasp_backend.exception.JsonProcessingException;
+import com.wasp.wasp_backend.service.MetricsAggregationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,12 +39,14 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
   private final ObjectMapper objectMapper;
   private final Set<WebSocketSession> sessions =
     ConcurrentHashMap.newKeySet();
+  private final MetricsAggregationService metricsAggregationService;
 
   private static final Logger log =
     LoggerFactory.getLogger(MetricsWebSocketHandler.class);
 
-  public MetricsWebSocketHandler(ObjectMapper objectMapper) {
+  public MetricsWebSocketHandler(ObjectMapper objectMapper, MetricsAggregationService metricsAggregationService) {
     this.objectMapper = objectMapper;
+    this.metricsAggregationService = metricsAggregationService;
   }
 
   @Override
@@ -154,7 +157,6 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
     throws JsonProcessingException {
 
     requireObject(cpuData, "cpu");
-    System.out.println("this is cpuData" + cpuData);
     requireFields(cpuData, "cpu",
       "cpu_mhz",
       "cpu_usage_percent",
@@ -174,7 +176,8 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
       requireObject(core, "cpu_cores[" + i + "]");
       requireFields(core, "cpu_cores[" + i + "]",
         "core_index",
-        "cpu_usage_percent"
+        "core_usage_percent",
+        "timestamp"
       );
     }
 
@@ -182,8 +185,11 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
     requireObject(memoryData, "memory");
     requireFields(memoryData, "memory",
       "total_bytes",
+      "free_bytes",
       "used_bytes",
-      "free_bytes"
+      "memory_usage_percent",
+      "page_fault_count",
+      "timestamp"
     );
 
     // ---- DISK (array of objects) ----
@@ -197,10 +203,12 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
       JsonNode disk = diskData.get(i);
       requireObject(disk, "disk[" + i + "]");
       requireFields(disk, "disk[" + i + "]",
-        "mount",
+        "drive_letter",
         "total_bytes",
-        "used_bytes",
-        "free_bytes"
+        "free_bytes",
+        "read_speed_bytes_per_sec",
+        "write_speed_bytes_per_sec",
+        "timestamp"
       );
     }
   }
@@ -248,7 +256,7 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
         new TypeReference<>() {
         });
 
-//      metricsAggregationService.ingest(cpu, cpuCores, memory, disk);
+      metricsAggregationService.ingest(cpu, cpuCores, memory, disk);
 
     } catch (IllegalArgumentException e) {
       e.printStackTrace();

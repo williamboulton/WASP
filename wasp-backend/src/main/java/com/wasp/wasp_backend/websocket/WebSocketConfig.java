@@ -1,5 +1,6 @@
 package com.wasp.wasp_backend.websocket;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
@@ -13,7 +14,7 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
  */
 @Configuration
 @EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer, WebSocketMessageBrokerConfigurer {
+public class WebSocketConfig implements WebSocketConfigurer {
   private final MetricsWebSocketHandler metricHandler;
 
   public WebSocketConfig(MetricsWebSocketHandler metricHandler) {
