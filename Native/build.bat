@@ -286,6 +286,12 @@ REM   - build\sysinfo.exe - The final executable
 REM   - main.obj - Intermediate object file (in current directory)
 REM -----------------------------------------------------------------------------
 cl /EHsc /W4 /std:c++17 /Fe:build\sysinfo.exe src\main.cpp /link psapi.lib advapi32.lib
+if errorlevel 1 goto :build_failed
+
+echo.
+echo Compiling system_metrics.cpp...
+cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.exe src\system_metrics.cpp /link psapi.lib advapi32.lib ntdll.lib pdh.lib powrprof.lib
+if errorlevel 1 goto :build_failed
 
 
 REM =============================================================================
@@ -299,11 +305,12 @@ REM ----------------------------------------------------------------------------
 REM Check if compilation failed (exit code >= 1).
 REM If it failed, print error message and exit with error code.
 REM -----------------------------------------------------------------------------
-if errorlevel 1 (
-    echo.
-    echo Build failed!
-    exit /b 1
-)
+goto :build_ok
+:build_failed
+echo.
+echo Build failed!
+exit /b 1
+:build_ok
 
 
 REM =============================================================================
@@ -315,6 +322,7 @@ echo.
 echo ========================================
 echo Build successful!
 echo Output: build\sysinfo.exe
+echo Output: build\system_metrics.exe
 echo ========================================
 echo.
 

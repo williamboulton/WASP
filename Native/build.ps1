@@ -256,6 +256,10 @@ $compileCmd = @"
 call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\sysinfo.exe src\main.cpp /link psapi.lib advapi32.lib
 "@
 
+$compileMetricsCmd = @"
+call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.exe src\system_metrics.cpp /link psapi.lib advapi32.lib ntdll.lib pdh.lib powrprof.lib
+"@
+
 
 # =============================================================================
 # SECTION 6: Execute the Compilation
@@ -263,7 +267,7 @@ call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\sysinfo.exe src
 
 
 # -----------------------------------------------------------------------------
-# Command: cmd /c $compileCmd
+# Command: cmd /c $compileCmd (main sysinfo tool)
 # -----------------------------------------------------------------------------
 # "cmd" is the old Windows command interpreter (cmd.exe).
 # 
@@ -282,6 +286,13 @@ call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\sysinfo.exe src
 # of the last native command (non-PowerShell executable).
 # -----------------------------------------------------------------------------
 cmd /c $compileCmd
+$mainExit = $LASTEXITCODE
+
+# -----------------------------------------------------------------------------
+# Build system_metrics.exe (metrics tool)
+# -----------------------------------------------------------------------------
+cmd /c $compileMetricsCmd
+$metricsExit = $LASTEXITCODE
 
 
 # =============================================================================
@@ -303,7 +314,7 @@ cmd /c $compileCmd
 # Note: PowerShell uses -eq instead of == because < and > are reserved for
 # redirection operators.
 # -----------------------------------------------------------------------------
-if ($LASTEXITCODE -eq 0) {
+if ($mainExit -eq 0 -and $metricsExit -eq 0) {
     
     # -------------------------------------------------------------------------
     # Success: Display success message
@@ -311,6 +322,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "`n========================================" -ForegroundColor Green
     Write-Host "Build successful!" -ForegroundColor Green
     Write-Host "Output: build\sysinfo.exe" -ForegroundColor Green
+    Write-Host "Output: build\system_metrics.exe" -ForegroundColor Green
     Write-Host "========================================`n" -ForegroundColor Green
     
     # -------------------------------------------------------------------------
@@ -350,6 +362,8 @@ if ($LASTEXITCODE -eq 0) {
     # Failure: Display error and exit
     # -------------------------------------------------------------------------
     Write-Host "`nBuild failed!" -ForegroundColor Red
+    if ($mainExit -ne 0) { Write-Host "  sysinfo.exe failed to compile." -ForegroundColor Red }
+    if ($metricsExit -ne 0) { Write-Host "  system_metrics.exe failed to compile." -ForegroundColor Red }
     exit 1
 }
 
