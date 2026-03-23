@@ -1,3 +1,10 @@
+/**
+ * W.A.S.P. System Monitor — client-side dashboard logic.
+ *
+ * Connects to a WebSocket metrics stream, updates CPU/memory/disk/process UI,
+ * manages view switching (Main / Memory / Disk / All Processes), theme toggle,
+ * and sortable process tables.
+ */
 const WS_URL = "ws://localhost:8080/ws/metrics";
 
 const connectionStatusEl = document.getElementById("connectionStatus");
@@ -28,6 +35,12 @@ const PRIORITY_ORDER = ["idle", "below normal", "normal", "above normal", "high"
 let processSortBy = "name";
 let processSortDir = "asc";
 
+/**
+ * Maps a Windows-style process priority string to a numeric rank for sorting.
+ * Unknown values sort after known priorities.
+ * @param {string} p - Raw priority (e.g. "NORMAL", "ABOVE_NORMAL").
+ * @returns {number} Index in PRIORITY_ORDER, or PRIORITY_ORDER.length if unknown.
+ */
 function priorityRank(p) {
   let s = String(p || "").toLowerCase().replace(/_/g, " ").trim();
   if (s === "real time") s = "realtime";
@@ -35,6 +48,12 @@ function priorityRank(p) {
   return i >= 0 ? i : PRIORITY_ORDER.length;
 }
 
+/**
+ * Comparator for two process objects using global processSortBy / processSortDir.
+ * @param {object} a
+ * @param {object} b
+ * @returns {number} Negative if a before b, positive if after, 0 if equal.
+ */
 function compareProcesses(a, b) {
   let va, vb;
   switch (processSortBy) {
@@ -71,10 +90,18 @@ function compareProcesses(a, b) {
   }
 }
 
+/**
+ * Returns a new array of processes sorted by the current column and direction.
+ * @param {object[]} list
+ * @returns {object[]}
+ */
 function sortProcesses(list) {
   return list.slice().sort(compareProcesses);
 }
 
+/**
+ * Updates chevron labels on all sortable process table headers to match current sort.
+ */
 function updateSortUI() {
   document.querySelectorAll(".processTable thead th[data-sort]").forEach((th) => {
     const key = th.getAttribute("data-sort");
@@ -94,11 +121,19 @@ let memoryHistory = [];
 let responsivenessHistory = [];
 const MAX_POINTS = 30; // ~25-30 seconds at 1s updates
 
+/**
+ * Sets sidebar connection status text and CSS class (e.g. status-ok / status-bad).
+ * @param {string} text
+ * @param {string} cssClass
+ */
 function setConnectionStatus(text, cssClass) {
   connectionStatusEl.textContent = text;
   connectionStatusEl.className = cssClass;
 }
 
+/**
+ * Writes the current local date/time into the sidebar footer element.
+ */
 function setCurrentDate() {
   if (!currentDateEl) return;
   const now = new Date();
@@ -115,6 +150,11 @@ function setCurrentDate() {
 
 const THEME_STORAGE_KEY = "wasp-system-monitor-theme";
 
+/**
+ * Applies light or dark theme by toggling body.light-theme.
+ * Default development theme is dark.
+ * @param {"light"|"dark"} theme
+ */
 function applyTheme(theme) {
   const root = document.body;
   if (!root) return;
@@ -125,6 +165,9 @@ function applyTheme(theme) {
   }
 }
 
+/**
+ * Restores theme from localStorage, or falls back to prefers-color-scheme.
+ */
 function initTheme() {
   let stored = null;
   try {
@@ -142,6 +185,9 @@ function initTheme() {
   applyTheme(prefersLight ? "light" : "dark");
 }
 
+/**
+ * Cycles light/dark theme and persists the choice to localStorage.
+ */
 function toggleTheme() {
   const isLight = document.body.classList.toggle("light-theme");
   try {
@@ -149,6 +195,10 @@ function toggleTheme() {
   } catch (_) {}
 }
 
+/**
+ * Opens the metrics WebSocket, parses JSON payloads, and drives updateDashboard.
+ * Reconnects after close/error with a short delay.
+ */
 function connectWebSocket() {
   socket = new WebSocket(WS_URL);
 
@@ -176,6 +226,10 @@ function connectWebSocket() {
   };
 }
 
+/**
+ * Single entry point after each metrics message: refreshes all dashboard sections.
+ * @param {object} data - Parsed JSON from the WebSocket (cpu, memory, disk, processes, etc.).
+ */
 function updateDashboard(data) {
   updateSummaryPanels(data);
   updateMemoryView(data);
@@ -187,11 +241,23 @@ function updateDashboard(data) {
   updateCpuHistory(data);
 }
 
+/**
+ * Formats a byte count as GiB with one decimal place.
+ * @param {number} bytes
+ * @returns {string}
+ */
 function formatBytesToGiB(bytes) {
   if (typeof bytes !== "number") return "–";
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GiB`;
 }
 
+/**
+ * Formats a memory object field for display in the Memory details table.
+ * Byte fields get raw + GiB; numbers get locale formatting; others stringify.
+ * @param {string} key
+ * @param {*} value
+ * @returns {string}
+ */
 function formatMemoryField(key, value) {
   if (typeof value === "number" && key.endsWith("_bytes")) {
     return `${value.toLocaleString()} (${formatBytesToGiB(value)})`;
@@ -202,6 +268,11 @@ function formatMemoryField(key, value) {
   return String(value ?? "–");
 }
 
+/**
+ * Converts bytes per second to a human-readable rate (B/s, KB/s, or MB/s).
+ * @param {number} bytesPerSec
+ * @returns {string}
+ */
 function formatRate(bytesPerSec) {
   if (typeof bytesPerSec !== "number") return "–";
   const kb = bytesPerSec / 1024;
@@ -211,16 +282,27 @@ function formatRate(bytesPerSec) {
   return `${bytesPerSec.toFixed(0)} B/s`;
 }
 
+/**
+ * Turns a snake_case JSON key into Title Case labels for detail tables.
+ * @param {string} key
+ * @returns {string}
+ */
 function labelFromKey(key) {
   return key
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Updates the dedicated Memory tab: gauge, summary, and all fields from data.memory.
+ * @param {object} data
+ */
 function updateMemoryView(data) {
   const memory = data?.memory;
   if (!memory) return;
 
+  // Pull the three values we use for the hero gauge; keep null if missing or wrong type
+  // so we can show "–" instead of NaN or bogus layout.
   const usedPercent =
     typeof memory.memory_usage_percent === "number" ? memory.memory_usage_percent : null;
   const usedBytes = typeof memory.used_bytes === "number" ? memory.used_bytes : null;
@@ -233,6 +315,8 @@ function updateMemoryView(data) {
     const clamped = Math.max(0, Math.min(100, usedPercent));
     memoryViewBarFillEl.style.width = `${clamped}%`;
   }
+
+  // Subtext: used vs total capacity in GiB (only if both byte counts exist).
   if (memoryViewSummaryEl) {
     if (usedBytes !== null && totalBytes !== null) {
       memoryViewSummaryEl.textContent = `${formatBytesToGiB(usedBytes)} / ${formatBytesToGiB(totalBytes)}`;
@@ -241,6 +325,7 @@ function updateMemoryView(data) {
     }
   }
 
+  // "Memory Details": one row per key on the memory object (total_bytes, page_fault_count, etc.).
   if (!memoryDetailsTableBodyEl) return;
   memoryDetailsTableBodyEl.innerHTML = "";
   Object.entries(memory).forEach(([key, value]) => {
@@ -253,6 +338,12 @@ function updateMemoryView(data) {
   });
 }
 
+/**
+ * Formats a disk object field for display (bytes, speeds, numbers, strings).
+ * @param {string} key
+ * @param {*} value
+ * @returns {string}
+ */
 function formatDiskField(key, value) {
   if (typeof value === "number" && key.endsWith("_bytes")) {
     if (key.includes("speed")) {
@@ -266,6 +357,10 @@ function formatDiskField(key, value) {
   return String(value ?? "–");
 }
 
+/**
+ * Renders the Disk tab: one card per drive with usage gauge and full field list.
+ * @param {object} data
+ */
 function updateDiskView(data) {
   if (!diskCardsEl) return;
   const disks = Array.isArray(data?.disk) ? data.disk : [];
@@ -318,6 +413,10 @@ function updateDiskView(data) {
   });
 }
 
+/**
+ * Updates main dashboard summary tiles: CPU %, responsiveness, and memory strip.
+ * @param {object} data
+ */
 function updateSummaryPanels(data) {
   if (data.cpu) {
     if (typeof data.cpu.cpu_usage_percent === "number") {
@@ -355,6 +454,10 @@ function updateSummaryPanels(data) {
   }
 }
 
+/**
+ * Rebuilds per-core radial gauges from data.cpu_cores.
+ * @param {object} data
+ */
 function updateCores(data) {
   if (!Array.isArray(data.cpu_cores)) return;
 
@@ -374,6 +477,10 @@ function updateCores(data) {
   });
 }
 
+/**
+ * Fills the Main view “Active Processes” table (CPU% > 0 only), sorted by current sort state.
+ * @param {object} data
+ */
 function updateProcesses(data) {
   if (!Array.isArray(data.processes)) return;
 
@@ -399,6 +506,10 @@ function updateProcesses(data) {
   });
 }
 
+/**
+ * Fills the All Processes table with every process, filtered by search box, sorted.
+ * @param {object|null} data
+ */
 function updateAllProcesses(data) {
   if (!allProcessesTableBodyEl || !Array.isArray(data?.processes)) return;
 
@@ -428,6 +539,10 @@ function updateAllProcesses(data) {
   });
 }
 
+/**
+ * Appends latest CPU %, memory %, and responsiveness % to rolling histories and redraws the chart.
+ * @param {object} data
+ */
 function updateCpuHistory(data) {
   if (data.cpu && typeof data.cpu.cpu_usage_percent === "number") {
     cpuHistory.push(data.cpu.cpu_usage_percent);
@@ -462,6 +577,10 @@ function updateCpuHistory(data) {
   drawCpuHistory();
 }
 
+/**
+ * Draws the live multi-series line chart on the Main view canvas (CPU, memory, responsiveness).
+ * Sizes the canvas to its CSS box so it stays sharp after view switches.
+ */
 function drawCpuHistory() {
   const canvas = document.getElementById("cpuUsageChart");
   if (!canvas) return;
@@ -570,10 +689,12 @@ function drawCpuHistory() {
   }
 }
 
+// Theme toggle in header: persists choice and toggles body.light-theme.
 if (themeToggleBtn) {
   themeToggleBtn.addEventListener("click", toggleTheme);
 }
 
+// Sidebar: switch content views (Main / Memory / Disk / All Processes); Export is a no-op for now.
 document.querySelectorAll(".nav-item[data-view]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const view = btn.getAttribute("data-view");
@@ -592,6 +713,7 @@ document.querySelectorAll(".nav-item[data-view]").forEach((btn) => {
   });
 });
 
+// Process tables: click column header to change sort column/direction and refresh both tables.
 document.querySelectorAll(".processTable").forEach((table) => {
   table.addEventListener("click", (e) => {
     const th = e.target.closest("th.sortable[data-sort]");
@@ -611,12 +733,14 @@ document.querySelectorAll(".processTable").forEach((table) => {
   });
 });
 
+// All Processes view: filter full list client-side on each keystroke.
 if (allProcessesSearchEl) {
   allProcessesSearchEl.addEventListener("input", () => {
     if (lastProcessesData) updateAllProcesses(lastProcessesData);
   });
 }
 
+// Boot: align sort chevrons with default sort, apply theme, start clock + WebSocket.
 updateSortUI();
 initTheme();
 setCurrentDate();
