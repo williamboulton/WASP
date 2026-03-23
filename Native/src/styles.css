@@ -31,6 +31,175 @@ body.light-theme #app {
   display: block;
 }
 
+#memorySection {
+  border-radius: 8px;
+  border: 1px solid #282b33;
+  padding: 12px;
+  background: #181c24;
+}
+
+body.light-theme #memorySection {
+  border-color: #e0d4c5;
+  background: #fffdf8;
+}
+
+.memory-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px) 1fr;
+  gap: 16px;
+}
+
+.memory-card {
+  border: 1px solid #282b33;
+  border-radius: 8px;
+  padding: 12px;
+  background: #151a22;
+}
+
+body.light-theme .memory-card {
+  border-color: #e0d4c5;
+  background: #fff;
+}
+
+.memory-big-value {
+  font-size: 34px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.memory-bar-large {
+  height: 22px;
+}
+
+.memory-subtext {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #a0a4b0;
+}
+
+body.light-theme .memory-subtext {
+  color: #555;
+}
+
+.memory-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.memory-details-table td {
+  padding: 6px 4px;
+  border-bottom: 1px solid #262a35;
+  font-size: 13px;
+}
+
+.memory-details-table td:first-child {
+  color: #a0a4b0;
+  width: 40%;
+}
+
+.memory-details-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+}
+
+body.light-theme .memory-details-table td {
+  border-bottom-color: #eee;
+}
+
+body.light-theme .memory-details-table td:first-child {
+  color: #555;
+}
+
+#diskSection {
+  border-radius: 8px;
+  border: 1px solid #282b33;
+  padding: 12px;
+  background: #181c24;
+}
+
+body.light-theme #diskSection {
+  border-color: #e0d4c5;
+  background: #fffdf8;
+}
+
+.disk-cards {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.disk-card {
+  border: 1px solid #282b33;
+  border-radius: 8px;
+  padding: 12px;
+  background: #151a22;
+}
+
+body.light-theme .disk-card {
+  border-color: #e0d4c5;
+  background: #fff;
+}
+
+.disk-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.disk-drive {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.disk-percent {
+  font-size: 14px;
+  font-weight: 600;
+  color: #39d353;
+}
+
+.disk-bar-fill {
+  background: linear-gradient(90deg, #39d353, #2ea043);
+}
+
+.disk-subtext {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #a0a4b0;
+}
+
+.disk-details {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.disk-details td {
+  padding: 5px 4px;
+  border-bottom: 1px solid #262a35;
+  font-size: 12px;
+}
+
+.disk-details td:first-child {
+  color: #a0a4b0;
+}
+
+.disk-details td:last-child {
+  text-align: right;
+  font-weight: 600;
+}
+
+body.light-theme .disk-subtext,
+body.light-theme .disk-details td:first-child {
+  color: #555;
+}
+
+body.light-theme .disk-details td {
+  border-bottom-color: #eee;
+}
+
 .processHeaderWithSearch {
   display: flex;
   justify-content: space-between;
@@ -411,6 +580,10 @@ body.light-theme .memory-bar {
   width: 0%;
   background: linear-gradient(90deg, #4da3ff, #3379d6);
   transition: width 0.25s ease-out;
+}
+
+.memory-bar-fill.disk-bar-fill {
+  background: linear-gradient(90deg, #39d353, #2ea043);
 }
 
 #processSection {

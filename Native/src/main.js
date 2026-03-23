@@ -11,8 +11,15 @@ const coresRowEl = document.getElementById("coresRow");
 const processTableBodyEl = document.querySelector("#processTable tbody");
 const viewMainEl = document.getElementById("viewMain");
 const viewProcessesEl = document.getElementById("viewProcesses");
+const viewMemoryEl = document.getElementById("viewMemory");
+const viewDiskEl = document.getElementById("viewDisk");
 const allProcessesTableBodyEl = document.querySelector("#allProcessesTable tbody");
 const allProcessesSearchEl = document.getElementById("allProcessesSearch");
+const memoryViewPercentEl = document.getElementById("memoryViewPercent");
+const memoryViewBarFillEl = document.getElementById("memoryViewBarFill");
+const memoryViewSummaryEl = document.getElementById("memoryViewSummary");
+const memoryDetailsTableBodyEl = document.querySelector("#memoryDetailsTable tbody");
+const diskCardsEl = document.getElementById("diskCards");
 
 let socket = null;
 let lastProcessesData = null;
@@ -171,11 +178,144 @@ function connectWebSocket() {
 
 function updateDashboard(data) {
   updateSummaryPanels(data);
+  updateMemoryView(data);
+  updateDiskView(data);
   updateCores(data);
   updateProcesses(data);
   if (Array.isArray(data.processes)) lastProcessesData = data;
   updateAllProcesses(lastProcessesData);
   updateCpuHistory(data);
+}
+
+function formatBytesToGiB(bytes) {
+  if (typeof bytes !== "number") return "–";
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GiB`;
+}
+
+function formatMemoryField(key, value) {
+  if (typeof value === "number" && key.endsWith("_bytes")) {
+    return `${value.toLocaleString()} (${formatBytesToGiB(value)})`;
+  }
+  if (typeof value === "number") {
+    return value.toLocaleString();
+  }
+  return String(value ?? "–");
+}
+
+function formatRate(bytesPerSec) {
+  if (typeof bytesPerSec !== "number") return "–";
+  const kb = bytesPerSec / 1024;
+  const mb = kb / 1024;
+  if (mb >= 1) return `${mb.toFixed(2)} MB/s`;
+  if (kb >= 1) return `${kb.toFixed(2)} KB/s`;
+  return `${bytesPerSec.toFixed(0)} B/s`;
+}
+
+function labelFromKey(key) {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function updateMemoryView(data) {
+  const memory = data?.memory;
+  if (!memory) return;
+
+  const usedPercent =
+    typeof memory.memory_usage_percent === "number" ? memory.memory_usage_percent : null;
+  const usedBytes = typeof memory.used_bytes === "number" ? memory.used_bytes : null;
+  const totalBytes = typeof memory.total_bytes === "number" ? memory.total_bytes : null;
+
+  if (memoryViewPercentEl) {
+    memoryViewPercentEl.textContent = usedPercent !== null ? `${usedPercent.toFixed(1)}%` : "–";
+  }
+  if (memoryViewBarFillEl && usedPercent !== null) {
+    const clamped = Math.max(0, Math.min(100, usedPercent));
+    memoryViewBarFillEl.style.width = `${clamped}%`;
+  }
+  if (memoryViewSummaryEl) {
+    if (usedBytes !== null && totalBytes !== null) {
+      memoryViewSummaryEl.textContent = `${formatBytesToGiB(usedBytes)} / ${formatBytesToGiB(totalBytes)}`;
+    } else {
+      memoryViewSummaryEl.textContent = "–";
+    }
+  }
+
+  if (!memoryDetailsTableBodyEl) return;
+  memoryDetailsTableBodyEl.innerHTML = "";
+  Object.entries(memory).forEach(([key, value]) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${labelFromKey(key)}</td>
+      <td>${formatMemoryField(key, value)}</td>
+    `;
+    memoryDetailsTableBodyEl.appendChild(row);
+  });
+}
+
+function formatDiskField(key, value) {
+  if (typeof value === "number" && key.endsWith("_bytes")) {
+    if (key.includes("speed")) {
+      return `${value.toLocaleString()} (${formatRate(value)})`;
+    }
+    return `${value.toLocaleString()} (${formatBytesToGiB(value)})`;
+  }
+  if (typeof value === "number") {
+    return value.toLocaleString();
+  }
+  return String(value ?? "–");
+}
+
+function updateDiskView(data) {
+  if (!diskCardsEl) return;
+  const disks = Array.isArray(data?.disk) ? data.disk : [];
+  diskCardsEl.innerHTML = "";
+
+  if (disks.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "disk-card";
+    empty.textContent = "No disk data available.";
+    diskCardsEl.appendChild(empty);
+    return;
+  }
+
+  disks.forEach((disk) => {
+    const totalBytes = typeof disk.total_bytes === "number" ? disk.total_bytes : 0;
+    const freeBytes = typeof disk.free_bytes === "number" ? disk.free_bytes : 0;
+    const usedBytes = Math.max(0, totalBytes - freeBytes);
+    const usedPct = totalBytes > 0 ? (usedBytes / totalBytes) * 100 : 0;
+
+    const card = document.createElement("article");
+    card.className = "disk-card";
+
+    const detailsRows = Object.entries(disk)
+      .map(
+        ([key, value]) => `
+          <tr>
+            <td>${labelFromKey(key)}</td>
+            <td>${formatDiskField(key, value)}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+    card.innerHTML = `
+      <div class="disk-card-header">
+        <div class="disk-drive">${disk.drive_letter || "Drive"}</div>
+        <div class="disk-percent">${usedPct.toFixed(1)}% used</div>
+      </div>
+      <div class="memory-bar">
+        <div class="memory-bar-fill disk-bar-fill" style="width:${Math.max(0, Math.min(100, usedPct))}%;"></div>
+      </div>
+      <div class="disk-subtext">${formatBytesToGiB(usedBytes)} / ${formatBytesToGiB(totalBytes)}</div>
+      <table class="disk-details">
+        <tbody>
+          ${detailsRows}
+        </tbody>
+      </table>
+    `;
+    diskCardsEl.appendChild(card);
+  });
 }
 
 function updateSummaryPanels(data) {
@@ -437,12 +577,14 @@ if (themeToggleBtn) {
 document.querySelectorAll(".nav-item[data-view]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const view = btn.getAttribute("data-view");
-    if (view === "memory" || view === "export") {
+    if (view === "export") {
       return;
     }
     document.querySelectorAll(".nav-item[data-view]").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     if (viewMainEl) viewMainEl.classList.toggle("active", view === "main");
+    if (viewMemoryEl) viewMemoryEl.classList.toggle("active", view === "memory");
+    if (viewDiskEl) viewDiskEl.classList.toggle("active", view === "disk");
     if (viewProcessesEl) viewProcessesEl.classList.toggle("active", view === "processes");
     if (view === "main") {
       requestAnimationFrame(() => drawCpuHistory());
