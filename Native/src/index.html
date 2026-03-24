@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>W.A.S.P. System Monitor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">W.A.S.P. Monitor</div>
+        </div>
+        <nav class="sidebar-nav">
+          <button class="nav-item active" data-view="main">Main</button>
+          <button class="nav-item" data-view="memory">Memory</button>
+          <button class="nav-item" data-view="disk">Disk</button>
+          <button class="nav-item" data-view="processes">All Processes</button>
+          <button class="nav-item" data-view="export">Export Report</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="sidebar-status">
+            <span class="status-indicator"></span>
+            <span id="connectionStatus">Connecting...</span>
+          </div>
+          <div id="currentDate" class="sidebar-date"></div>
+        </div>
+      </aside>
+
+      <main id="mainContent">
+        <header id="header">
+          <h1>System Monitor</h1>
+          <button id="themeToggle" class="icon-button" aria-label="Toggle light or dark mode">
+            <span class="icon-sun" aria-hidden="true"></span>
+          </button>
+        </header>
+
+        <div id="viewMain" class="content-view active">
+          <section id="graphs">
+            <canvas id="cpuUsageChart"></canvas>
+          </section>
+
+          <section id="coresRow"></section>
+
+          <section id="summaryPanels">
+            <div class="panel">
+              <div class="panel-label">Total CPU Usage</div>
+              <div id="totalCpuValue" class="panel-value">–</div>
+            </div>
+            <div class="panel">
+              <div class="panel-label">Responsiveness</div>
+              <div id="responsivenessValue" class="panel-value">–</div>
+            </div>
+            <div class="panel">
+              <div class="panel-label">Memory Usage</div>
+              <div id="memoryText" class="panel-value">–</div>
+              <div class="memory-bar">
+                <div id="memoryBarFill" class="memory-bar-fill"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="processSection">
+            <div id="processHeader">
+              <span class="processTableTitle">Active Processes</span>
+            </div>
+
+            <div class="processTableWrapper">
+              <table id="processTable" class="processTable">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="name">Process Name<span class="sort-chevron active"> ▲</span></th>
+                    <th class="sortable" data-sort="owner">Owner<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="pid">PID<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="priority">Priority<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="cpu_percent">CPU%<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="cpu_time_100ns">CPU Time<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="location">Location<span class="sort-chevron"> ▲▼</span></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div id="viewProcesses" class="content-view">
+          <section id="allProcessesSection" class="processSectionFull">
+            <div id="allProcessesHeader" class="processHeaderWithSearch">
+              <span class="processTableTitle">All Processes</span>
+              <input id="allProcessesSearch" placeholder="Search..." />
+            </div>
+            <div class="processTableWrapper">
+              <table id="allProcessesTable" class="processTable">
+                <thead>
+                  <tr>
+                    <th class="sortable" data-sort="name">Process Name<span class="sort-chevron active"> ▲</span></th>
+                    <th class="sortable" data-sort="owner">Owner<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="pid">PID<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="priority">Priority<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="cpu_percent">CPU%<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="cpu_time_100ns">CPU Time<span class="sort-chevron"> ▲▼</span></th>
+                    <th class="sortable" data-sort="location">Location<span class="sort-chevron"> ▲▼</span></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div id="viewMemory" class="content-view">
+          <section id="memorySection">
+            <div class="memory-layout">
+              <div class="memory-card">
+                <div class="processTableTitle">Memory In Use</div>
+                <div id="memoryViewPercent" class="memory-big-value">–</div>
+                <div class="memory-bar memory-bar-large">
+                  <div id="memoryViewBarFill" class="memory-bar-fill"></div>
+                </div>
+                <div id="memoryViewSummary" class="memory-subtext">–</div>
+              </div>
+
+              <div class="memory-card">
+                <div class="processTableTitle">Memory Details</div>
+                <table id="memoryDetailsTable" class="memory-details-table">
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div id="viewDisk" class="content-view">
+          <section id="diskSection">
+            <div class="processTableTitle">Disk</div>
+            <div id="diskCards" class="disk-cards"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+  </html>
+
