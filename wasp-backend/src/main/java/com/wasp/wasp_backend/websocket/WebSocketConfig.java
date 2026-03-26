@@ -3,6 +3,7 @@ package com.wasp.wasp_backend.websocket;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.socket.config.annotation.*;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
@@ -25,6 +26,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
    * This Bean allows messages of 2MB to be sent over the socket which we need
    * for our Windows service payloads
    */
+  @Profile("!test")
   @Bean
   public ServletServerContainerFactoryBean createWebSocketContainer() {
     ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
