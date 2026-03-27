@@ -62,15 +62,21 @@ build.bat
 
 From Developer Command Prompt:
 ```cmd
-cl /EHsc /W4 /std:c++17 src\main.cpp /Fe:sysinfo.exe /link psapi.lib
+cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.exe src\system_metrics.cpp /link psapi.lib advapi32.lib ntdll.lib pdh.lib powrprof.lib
 ```
 
 ## Running the Program
 
 After building:
 ```cmd
-.\build\sysinfo.exe
+.\build\system_metrics.exe install
 ```
+
+This installs Windows Service SystemMetricsService. Manually start it or stop it via:
+```cmd
+net start SystemMetricsService
+```
+
 
 **Note:** Some process information requires Administrator privileges for full access.
 
