@@ -26,7 +26,10 @@ public class MetricsAggregationService {
 
   private List<DiskData> runningDiskTotals;
 
+  private MetricRepository metricRepository;
+
   public MetricsAggregationService(MetricRepository metricRepository) {
+    this.metricRepository = metricRepository;
   }
 
   /**
