@@ -11,8 +11,8 @@ from typing import List
 
 """
 This script was generated with ChatGPT, using the runner.py file that I wrote myself.
-I prompted it to give refactor that program using a test data construction design
-patter to easily change generated json payloads that are the input into our java program.
+I prompted it to refactor that program using a test data construction design
+pattern to easily change generated json payloads, that are put in to our java program.
 It needs to be tweaked a bit.
 
 Patrick Muller
@@ -32,7 +32,7 @@ def load_config(path="config.json"):
 
 class CpuStrategy:
     def compute(self, index: int) -> float:
-        raise NotImplementedError
+        return random.uniform(0.0, 100.0)
 
 class LinearCpuStrategy(CpuStrategy):
     def __init__(self, base: float, variance: int):
@@ -128,6 +128,8 @@ def assert_results(expected_path: str, actual: dict, tolerance=0.01):
     assert approx_equal(expected["cpu"]["cpu_usage_percent"], actual["cpu"]["cpu_usage_percent"]), "CPU average mismatch"
 
     for i, core in enumerate(expected["cpu_cores"]):
+        print(f"expected core usage: {core['core_usage_percent']}")
+        print(f"actual core usage: {actual['cpu_cores'][i]['core_usage_percent']}")
         assert approx_equal(core["core_usage_percent"], actual["cpu_cores"][i]["core_usage_percent"]), f"Core {i} mismatch"
 
     print("\n✅ Aggregation test passed")
@@ -197,8 +199,11 @@ class AggregationTestHarness:
                 expected_path = "input/input.json"
                 generate_expected_output(expected_path, total_cpu, core_totals, self.payload_count, self.config)
 
-                # simulate fetching actual output (replace with real API call)
-                actual = requests.get(self.api_url + "/aggregated").json()
+                # wait 5 seconds for JAR to write to output.json
+                time.sleep(5)
+
+                with open("output/output.json", 'r') as f:
+                    actual = json.load(f)
 
                 assert_results(expected_path, actual)
 
