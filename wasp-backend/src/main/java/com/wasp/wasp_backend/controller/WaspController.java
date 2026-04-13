@@ -16,8 +16,7 @@ public class WaspController {
   }
 
   @GetMapping("/health")
-  public String hello(){
-    repo.health();
-    return "Hello from backend!";
+  public String health(){
+    return "Backend is healthy!";
   }
 }

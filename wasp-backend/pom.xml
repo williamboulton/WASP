@@ -61,7 +61,16 @@
       <version>1.18.30</version>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>3.0.4</version>
+    </dependency>
   </dependencies>
 
 	<build>

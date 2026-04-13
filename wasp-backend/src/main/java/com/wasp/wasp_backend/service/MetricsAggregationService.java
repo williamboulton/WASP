@@ -6,9 +6,15 @@ import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
 import com.wasp.wasp_backend.repository.MetricRepository;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MetricsAggregationService {
@@ -134,47 +140,69 @@ public class MetricsAggregationService {
    * @author Patrick Muller
    */
   private void emitAggregatedMetrics() {
-    double aggCpuMhz = avg(runningCpuTotals.getCpu_mhz());
-    double aggCpuUsage = avg(runningCpuTotals.getCpu_usage_percent());
-    double aggCpuSystemResp = avg(runningCpuTotals.getSystem_responsiveness_percent());
+    Map<String, Object> root = new HashMap<>();
 
-    System.out.println("Aggregated CPU Mhz: " + aggCpuMhz);
-    System.out.println("Aggregated Cpu Usage %: " + aggCpuUsage);
-    System.out.println("Aggregated Cpu System Responsiveness %: " + aggCpuSystemResp);
+    // CPU
+    Map<String, Object> cpu = new HashMap<>();
+    cpu.put("cpu_mhz", avg(runningCpuTotals.getCpu_mhz()));
+    cpu.put("cpu_usage_percent", avg(runningCpuTotals.getCpu_usage_percent()));
+    cpu.put("system_responsiveness_percent", avg(runningCpuTotals.getSystem_responsiveness_percent()));
+    cpu.put("timestamp", runningCpuTotals.getTimestamp());
 
-    for (int i = 0; i < runningCoreTotals.size(); i++) {
-      CpuCoreData currAggCore = runningCoreTotals.get(i);
-      double aggCpuCoreMhz = avg(currAggCore.getCore_mhz());
-      double aggCpuCoreUsage = avg(currAggCore.getCore_usage_percent());
-      System.out.println("Aggregated Cpu Core: {" + currAggCore.getCore_index() + "} Mhz: " + aggCpuCoreMhz);
-      System.out.println("Aggregated Cpu Core: {" + currAggCore.getCore_index() + "} Core Usage: " + aggCpuCoreUsage);
+    root.put("cpu", cpu);
+
+    List<Map<String, Object>> cores = new ArrayList<>();
+    for (CpuCoreData core : runningCoreTotals) {
+      Map<String, Object> coreMap = new HashMap<>();
+      coreMap.put("core_index", core.getCore_index());
+      coreMap.put("core_mhz", avg(core.getCore_mhz()));
+      coreMap.put("core_usage_percent", avg(core.getCore_usage_percent()));
+      coreMap.put("timestamp", core.getTimestamp());
+      cores.add(coreMap);
     }
 
-    // Cast long's to doubles for floating point division, not integer division
-    double aggMemTotalBytes = avg((double) runningMemTotals.getTotal_bytes());
-    double aggMemFreeBytes = avg((double) runningMemTotals.getFree_bytes());
-    double aggMemUsedBytes = avg((double) runningMemTotals.getUsed_bytes());
-    double aggMemUsagePercent = avg(runningMemTotals.getMemory_usage_percent());
-    double aggMemPageFaultCount = avg((double) runningMemTotals.getPage_fault_count());
+    root.put("cpu_cores", cores);
 
-    System.out.println("Aggregated Mem Total Bytes: " + aggMemTotalBytes);
-    System.out.println("Aggregated Mem Free Bytes: " + aggMemFreeBytes);
-    System.out.println("Aggregated Mem Used Bytes: " + aggMemUsedBytes);
-    System.out.println("Aggregated Mem Usage Percent: " + aggMemUsagePercent);
-    System.out.println("Aggregated Mem Page Fault Count: " + aggMemPageFaultCount);
+    // Memory
+    Map<String, Object> memory = new HashMap<>();
+    memory.put("total_bytes", avg((double) runningMemTotals.getTotal_bytes()));
+    memory.put("free_bytes", avg((double) runningMemTotals.getFree_bytes()));
+    memory.put("used_bytes", avg((double) runningMemTotals.getUsed_bytes()));
+    memory.put("usage_percent", avg(runningMemTotals.getMemory_usage_percent()));
+    memory.put("page_fault_count", avg((double) runningMemTotals.getPage_fault_count()));
+    memory.put("timestamp", runningMemTotals.getTimestamp());
 
-    for (int i = 0; i < runningDiskTotals.size(); i++) {
-      DiskData currAggDisk = this.runningDiskTotals.get(i);
-      double aggDiskTotalBytes = avg((double) currAggDisk.getTotal_bytes());
-      double aggDiskFreeBytes = avg((double) currAggDisk.getFree_bytes());
-      double aggDiskReadSpeed = avg(currAggDisk.getRead_speed_bytes_per_sec());
-      double aggDiskWriteSpeed = avg(currAggDisk.getWrite_speed_bytes_per_sec());
-      System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Total Bytes: " + aggDiskTotalBytes);
-      System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Free Bytes: " + aggDiskFreeBytes);
-      System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Read Speed: " + aggDiskReadSpeed);
-      System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Write Speed: " + aggDiskWriteSpeed);
+    root.put("memory", memory);
+
+    // Disk
+    List<Map<String, Object>> disks = new ArrayList<>();
+    for (DiskData disk : runningDiskTotals) {
+      Map<String, Object> diskMap = new HashMap<>();
+      diskMap.put("drive", disk.getDrive_letter());
+      diskMap.put("total_bytes", avg((double) disk.getTotal_bytes()));
+      diskMap.put("free_bytes", avg((double) disk.getFree_bytes()));
+      diskMap.put("read_speed", avg(disk.getRead_speed_bytes_per_sec()));
+      diskMap.put("write_speed", avg(disk.getWrite_speed_bytes_per_sec()));
+      diskMap.put("timestamp", disk.getTimestamp());
+      disks.add(diskMap);
     }
 
+    root.put("disks", disks);
+
+    // Write JSON file
+    try {
+      new JsonMapper();
+      JsonMapper mapper = JsonMapper.builder()
+        .enable(SerializationFeature.INDENT_OUTPUT) // pretty print
+        .build();
+
+      File outputFile = new File("output/", "output.json");
+      outputFile.getParentFile().mkdirs();
+      mapper.writeValue(outputFile, root);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
