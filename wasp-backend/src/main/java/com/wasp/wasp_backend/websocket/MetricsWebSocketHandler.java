@@ -224,8 +224,8 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
    * @throws Exception Throws exception upon error in formatting
    */
   @Override
-  protected void handleTextMessage(WebSocketSession session,
-                                   TextMessage message) throws Exception {
+  public void handleTextMessage(WebSocketSession session,
+                                TextMessage message) throws Exception {
 
     String rawJson = message.getPayload();
 
