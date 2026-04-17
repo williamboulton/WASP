@@ -4,6 +4,7 @@ import com.wasp.wasp_backend.dto.CpuCoreData;
 import com.wasp.wasp_backend.dto.CpuData;
 import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
+import com.wasp.wasp_backend.dto.ProcessData;
 import com.wasp.wasp_backend.repository.MetricRepository;
 import org.springframework.stereotype.Service;
 
@@ -138,6 +139,8 @@ public class MetricsAggregationService {
     double aggCpuUsage = avg(runningCpuTotals.getCpu_usage_percent());
     double aggCpuSystemResp = avg(runningCpuTotals.getSystem_responsiveness_percent());
 
+    metricRepository.insertCpu(runningCpuTotals.getTimestamp(), aggCpuMhz, aggCpuUsage);
+
     System.out.println("Aggregated CPU Mhz: " + aggCpuMhz);
     System.out.println("Aggregated Cpu Usage %: " + aggCpuUsage);
     System.out.println("Aggregated Cpu System Responsiveness %: " + aggCpuSystemResp);
@@ -146,6 +149,12 @@ public class MetricsAggregationService {
       CpuCoreData currAggCore = runningCoreTotals.get(i);
       double aggCpuCoreMhz = avg(currAggCore.getCore_mhz());
       double aggCpuCoreUsage = avg(currAggCore.getCore_usage_percent());
+      metricRepository.insertCpuCore(
+        currAggCore.getTimestamp(),
+        currAggCore.getCore_index(),
+        aggCpuCoreMhz,
+        aggCpuCoreUsage
+      );
       System.out.println("Aggregated Cpu Core: {" + currAggCore.getCore_index() + "} Mhz: " + aggCpuCoreMhz);
       System.out.println("Aggregated Cpu Core: {" + currAggCore.getCore_index() + "} Core Usage: " + aggCpuCoreUsage);
     }
@@ -156,6 +165,15 @@ public class MetricsAggregationService {
     double aggMemUsedBytes = avg((double) runningMemTotals.getUsed_bytes());
     double aggMemUsagePercent = avg(runningMemTotals.getMemory_usage_percent());
     double aggMemPageFaultCount = avg((double) runningMemTotals.getPage_fault_count());
+
+    metricRepository.insertMemory(
+      runningMemTotals.getTimestamp(),
+      aggMemTotalBytes,
+      aggMemFreeBytes,
+      aggMemUsedBytes,
+      aggMemUsagePercent,
+      aggMemPageFaultCount
+    );
 
     System.out.println("Aggregated Mem Total Bytes: " + aggMemTotalBytes);
     System.out.println("Aggregated Mem Free Bytes: " + aggMemFreeBytes);
@@ -169,6 +187,14 @@ public class MetricsAggregationService {
       double aggDiskFreeBytes = avg((double) currAggDisk.getFree_bytes());
       double aggDiskReadSpeed = avg(currAggDisk.getRead_speed_bytes_per_sec());
       double aggDiskWriteSpeed = avg(currAggDisk.getWrite_speed_bytes_per_sec());
+      metricRepository.insertDisk(
+        currAggDisk.getTimestamp(),
+        currAggDisk.getDrive_letter(),
+        aggDiskTotalBytes,
+        aggDiskFreeBytes,
+        aggDiskReadSpeed,
+        aggDiskWriteSpeed
+      );
       System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Total Bytes: " + aggDiskTotalBytes);
       System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Free Bytes: " + aggDiskFreeBytes);
       System.out.println("Aggregated Disk: {" + currAggDisk.getDrive_letter() + "} Read Speed: " + aggDiskReadSpeed);
@@ -188,6 +214,22 @@ public class MetricsAggregationService {
     return Math.round(total / sampleCount * 100.0) / 100.0;
   }
 
+  private void persistProcesses(List<ProcessData> processData) {
+    for (ProcessData process : processData) {
+      metricRepository.insertProcess(
+        process.getTimestamp(),
+        process.getPid(),
+        process.getName(),
+        process.getOwner(),
+        process.getPriority(),
+        process.getCpu_percent(),
+        process.getCpu_time_100ns(),
+        process.getMem_percent(),
+        process.getLocation()
+      );
+    }
+  }
+
 
   /**
    * Aggregate current payload, emit and reset when window size is reached.
@@ -195,9 +237,11 @@ public class MetricsAggregationService {
    * @param cpuCoreData New cpu core data
    * @param memoryData New memory data
    * @param diskData New disk data
+   * @param processData New process data
    * @author Patrick Muller
    */
-  public void ingest(CpuData cpuData, List<CpuCoreData> cpuCoreData, MemoryData memoryData, List<DiskData> diskData) {
+  public void ingest(CpuData cpuData, List<CpuCoreData> cpuCoreData, MemoryData memoryData,
+                     List<DiskData> diskData, List<ProcessData> processData) {
     // initialize collections
     if (runningCoreTotals == null) {
       runningCoreTotals = new ArrayList<>(cpuCoreData.size());
@@ -216,6 +260,7 @@ public class MetricsAggregationService {
       resetState(cpuData, cpuCoreData, memoryData, diskData);
 
     accumulate(cpuData, cpuCoreData, memoryData, diskData);
+    persistProcesses(processData);
 
     sampleCount++;
 

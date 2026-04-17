@@ -4,6 +4,7 @@ import com.wasp.wasp_backend.dto.CpuCoreData;
 import com.wasp.wasp_backend.dto.CpuData;
 import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
+import com.wasp.wasp_backend.dto.ProcessData;
 import com.wasp.wasp_backend.exception.JsonProcessingException;
 import com.wasp.wasp_backend.service.MetricsAggregationService;
 import org.slf4j.Logger;
@@ -149,11 +150,13 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
    * @param cpuCoreData Cpu core field
    * @param memoryData  Memory field
    * @param diskData    Disk field
+   * @param processData Process field
    */
   private void validateMetricData(JsonNode cpuData,
                                   JsonNode cpuCoreData,
                                   JsonNode memoryData,
-                                  JsonNode diskData)
+                                  JsonNode diskData,
+                                  JsonNode processData)
     throws JsonProcessingException {
 
     requireObject(cpuData, "cpu");
@@ -211,6 +214,20 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
         "timestamp"
       );
     }
+
+    // ---- PROCESSES (array of objects) ----
+    requireArray(processData, "processes");
+    for (int i = 0; i < processData.size(); i++) {
+      JsonNode process = processData.get(i);
+      requireObject(process, "processes[" + i + "]");
+      requireFields(process, "processes[" + i + "]",
+        "pid",
+        "name",
+        "cpu_percent",
+        "cpu_time_100ns",
+        "timestamp"
+      );
+    }
   }
 
   /**
@@ -239,9 +256,10 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
       JsonNode cpuCoresNode = root.path("cpu_cores");
       JsonNode memoryNode = root.path("memory");
       JsonNode diskNode = root.path("disk");
+      JsonNode processesNode = root.path("processes");
 
       // validation occurs after relay to reduce overhead
-      validateMetricData(cpuNode, cpuCoresNode, memoryNode, diskNode);
+      validateMetricData(cpuNode, cpuCoresNode, memoryNode, diskNode, processesNode);
 
       CpuData cpu = objectMapper.treeToValue(cpuNode, CpuData.class);
 
@@ -256,7 +274,11 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
         new TypeReference<>() {
         });
 
-      metricsAggregationService.ingest(cpu, cpuCores, memory, disk);
+      List<ProcessData> processes = objectMapper.convertValue(processesNode,
+        new TypeReference<>() {
+        });
+
+      metricsAggregationService.ingest(cpu, cpuCores, memory, disk, processes);
 
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
