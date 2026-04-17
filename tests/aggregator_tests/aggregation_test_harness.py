@@ -13,7 +13,8 @@ from typing import List, Dict
 This script was generated with ChatGPT, using the runner.py file that I wrote myself.
 I prompted it to refactor that program using a test data construction design
 pattern to easily change generated json payloads, that are put in to our java program.
-It needs to be tweaked a bit.
+I tweaked it a bit to send multiple payloads with realistic data, and compare the results
+from the java program to the results python generated.
 
 Patrick Muller
 """
@@ -210,10 +211,17 @@ def assert_results(expected_path: str, actual: dict, tolerance=0.01):
     def approx_equal(a, b):
         return abs(a - b) <= tolerance
 
-    assert approx_equal(expected["cpu"]["cpu_usage_percent"], actual["cpu"]["cpu_usage_percent"]), "CPU average mismatch"
+    expected_cpu = expected["cpu"]
+    actual_cpu = actual["cpu"]
+
+    for key in ["cpu_usage_percent", "system_responsiveness_percent", "cpu_mhz"]:
+        assert approx_equal(expected_cpu[key], actual_cpu[key]), f"CPU {key} mismatch"
 
     for i, core in enumerate(expected["cpu_cores"]):
-        assert approx_equal(core["core_usage_percent"], actual["cpu_cores"][i]["core_usage_percent"]), f"Core {i} mismatch"
+        assert approx_equal(
+            core["core_usage_percent"],
+            actual["cpu_cores"][i]["core_usage_percent"]
+        ), f"Core {i} mismatch"
 
     expected_mem = expected["memory"]
     actual_mem = actual["memory"]
@@ -221,8 +229,7 @@ def assert_results(expected_path: str, actual: dict, tolerance=0.01):
     for key in ["used_bytes", "total_bytes", "free_bytes", "memory_usage_percent", "page_fault_count"]:
         assert approx_equal(expected_mem[key], actual_mem[key]), f"Memory {key} mismatch"
 
-    print("\n✅ Aggregation test passed")
-
+    print(f"\n✅ Aggregation test passed for {expected_path}")
 # =========================
 # Test Runner
 # =========================
@@ -231,13 +238,17 @@ class AggregationTestHarness:
     def __init__(self, config_path="config.json"):
         self.config = load_config(config_path)
         self.payload_count = self.config.get("payload_count", 60)
+        self.window_size = self.config.get("aggregation_window_size", 60)
         self.api_url = self.config.get("api_url", "http://localhost:8080/api")
         self.ws_url = self.config.get("ws_url", "ws://localhost:8080/ws/metrics")
         self.jar_path = self.config.get("jar_path")
+        self.output_file = Path("output/output.json")
+        self.expected_dir = Path("input")
+        self.actual_dir = Path("output")
 
         self.builder = PayloadBuilder(
             self.config,
-            LinearCpuStrategy(
+            SpikeCpuStrategy(
                 self.config["cpu"]["base_usage"],
                 self.config["cpu"]["variance"]
             ),
@@ -264,6 +275,68 @@ class AggregationTestHarness:
                 time.sleep(1)
         raise RuntimeError("Backend failed to start")
 
+    def _new_window_totals(self):
+        return {
+            "total_cpu_usage": 0.0,
+            "total_cpu_responsiveness": 0.0,
+            "total_cpu_mhz": 0.0,
+            "core_totals": [0.0 for _ in range(self.config["cpu_cores"]["count"])],
+            "total_mem_used": 0.0,
+            "total_mem_total": 0.0,
+            "total_mem_free": 0.0,
+            "total_mem_percent": 0.0,
+            "total_page_faults": 0.0,
+            "count": 0
+        }
+
+    def _update_window_totals(self, totals: dict, cpu_data: dict, cores: list, mem: dict):
+        totals["total_cpu_usage"] += cpu_data["cpu_usage_percent"]
+        totals["total_cpu_responsiveness"] += cpu_data["system_responsiveness_percent"]
+        totals["total_cpu_mhz"] += cpu_data["cpu_mhz"]
+
+        totals["total_mem_used"] += mem["used_bytes"]
+        totals["total_mem_total"] += mem["total_bytes"]
+        totals["total_mem_free"] += mem["free_bytes"]
+        totals["total_mem_percent"] += mem["memory_usage_percent"]
+        totals["total_page_faults"] += mem["page_fault_count"]
+
+        for j, val in enumerate(cores):
+            totals["core_totals"][j] += val
+
+        totals["count"] += 1
+
+    def _build_expected_totals(self, totals: dict):
+        count = totals["count"]
+
+        cpu_totals = {
+            "cpu_usage_percent": round(totals["total_cpu_usage"] / count, 2),
+            "system_responsiveness_percent": round(totals["total_cpu_responsiveness"] / count, 2),
+            "cpu_mhz": round(totals["total_cpu_mhz"] / count, 2),
+            "timestamp": ""
+        }
+
+        memory_totals = {
+            "used_bytes": round(totals["total_mem_used"] / count, 2),
+            "total_bytes": round(totals["total_mem_total"] / count, 2),
+            "free_bytes": round(totals["total_mem_free"] / count, 2),
+            "memory_usage_percent": round(totals["total_mem_percent"] / count, 2),
+            "page_fault_count": round(totals["total_page_faults"] / count, 2),
+            "timestamp": ""
+        }
+
+        return cpu_totals, memory_totals
+
+    def _wait_for_output_update(self, previous_mtime=None, timeout=15):
+        start = time.time()
+        while time.time() - start < timeout:
+            if self.output_file.exists():
+                current_mtime = self.output_file.stat().st_mtime
+                if previous_mtime is None or current_mtime > previous_mtime:
+                    return current_mtime
+            time.sleep(0.25)
+
+        raise TimeoutError(f"Timed out waiting for backend to update {self.output_file}")
+
     async def run(self):
         java_process = self.start_backend()
         print("Starting backend...")
@@ -272,71 +345,58 @@ class AggregationTestHarness:
             self.wait_for_health()
             print("Backend healthy")
 
+            self.expected_dir.mkdir(parents=True, exist_ok=True)
+            self.actual_dir.mkdir(parents=True, exist_ok=True)
+
+            last_output_mtime = self.output_file.stat().st_mtime if self.output_file.exists() else None
+            totals = self._new_window_totals()
+            window_index = 1
+
             async with websockets.connect(self.ws_url) as ws:
                 print("WebSocket connected")
-
-                total_cpu_usage = 0
-                total_cpu_responsiveness = 0
-                total_cpu_mhz = 0
-                core_totals = [0.0 for _ in range(self.config["cpu_cores"]["count"])]
-
-                total_mem_used = 0.0
-                total_mem_total = 0.0
-                total_mem_free = 0.0
-                total_mem_percent = 0.0
-                total_page_faults = 0.0
 
                 start_time = datetime.now()
 
                 for i in range(self.payload_count):
                     payload, cpu_data, cores = self.builder.build(i, start_time)
-
-                    total_cpu_usage += cpu_data["cpu_usage_percent"]
-                    total_cpu_responsiveness += cpu_data["system_responsiveness_percent"]
-                    total_cpu_mhz += cpu_data["cpu_mhz"]
-
                     mem = payload["memory"]
 
-                    total_mem_used += mem["used_bytes"]
-                    total_mem_total += mem["total_bytes"]
-                    total_mem_free += mem["free_bytes"]
-                    total_mem_percent += mem["memory_usage_percent"]
-                    total_page_faults += mem["page_fault_count"]
-
-                    for j, val in enumerate(cores):
-                        core_totals[j] += val
+                    self._update_window_totals(totals, cpu_data, cores, mem)
 
                     await ws.send(json.dumps(payload))
 
-                count = self.payload_count
+                    if totals["count"] == self.window_size:
+                        cpu_totals, memory_totals = self._build_expected_totals(totals)
 
-                cpu_totals = {
-                    "cpu_usage_percent": round(total_cpu_usage / count, 2),
-                    "cpu_responsiveness_percent": round(total_cpu_responsiveness / count, 2),
-                    "cpu_mhz": total_cpu_mhz / count,
-                    "timestamp": ""
-                }
+                        expected_path = self.expected_dir / f"expected_minute_{window_index}.json"
+                        actual_snapshot_path = self.actual_dir / f"actual_minute_{window_index}.json"
 
-                memory_totals = {
-                    "used_bytes": total_mem_used / count,
-                    "total_bytes": total_mem_total / count,
-                    "free_bytes": total_mem_free / count,
-                    "memory_usage_percent": round(total_mem_percent / count, 2),
-                    "page_fault_count": total_page_faults / count,
-                    "timestamp": ""
-                }
+                        generate_expected_output(
+                            str(expected_path),
+                            cpu_totals,
+                            totals["core_totals"],
+                            memory_totals,
+                            totals["count"],
+                            self.config
+                        )
 
-                expected_path = "input/input.json"
+                        last_output_mtime = self._wait_for_output_update(last_output_mtime)
 
-                generate_expected_output(expected_path, cpu_totals, core_totals, memory_totals, self.payload_count, self.config)
+                        with open(self.output_file, "r") as f:
+                            actual = json.load(f)
 
-                # wait 5 seconds for JAR to write to output.json
-                time.sleep(5)
+                        with open(actual_snapshot_path, "w") as f:
+                            json.dump(actual, f, indent=4)
 
-                with open("output/output.json", 'r') as f:
-                    actual = json.load(f)
+                        assert_results(str(expected_path), actual)
+                        print(f"✅ Window {window_index} passed")
 
-                assert_results(expected_path, actual)
+                        window_index += 1
+                        totals = self._new_window_totals()
+
+                if totals["count"] > 0:
+                    print(f"⚠️ Ignoring trailing partial window of {totals['count']} payloads")
+
         except Exception as e:
             print(e)
 
