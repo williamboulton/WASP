@@ -168,7 +168,7 @@ public class MetricsAggregationService {
     memory.put("total_bytes", avg((double) runningMemTotals.getTotal_bytes()));
     memory.put("free_bytes", avg((double) runningMemTotals.getFree_bytes()));
     memory.put("used_bytes", avg((double) runningMemTotals.getUsed_bytes()));
-    memory.put("usage_percent", avg(runningMemTotals.getMemory_usage_percent()));
+    memory.put("memory_usage_percent", avg(runningMemTotals.getMemory_usage_percent()));
     memory.put("page_fault_count", avg((double) runningMemTotals.getPage_fault_count()));
     memory.put("timestamp", runningMemTotals.getTimestamp());
 
@@ -237,6 +237,16 @@ public class MetricsAggregationService {
       runningDiskTotals = new ArrayList<>(diskData.size());
       for (int i = 0; i < diskData.size(); i++)
         runningDiskTotals.add(new DiskData());
+    }
+
+    if (cpuCoreData.size() != runningCoreTotals.size()) {
+      throw new IllegalArgumentException(
+        "cpu_cores length changed from " + runningCoreTotals.size() + " to " + cpuCoreData.size());
+    }
+
+    if (diskData.size() != runningDiskTotals.size()) {
+      throw new IllegalArgumentException(
+        "disk length changed from " + runningDiskTotals.size() + " to " + diskData.size());
     }
 
     // reset aggregated data after window is complete

@@ -1,0 +1,5 @@
+venv/
+input/
+output/
+wasp.db
+__pycache__/
