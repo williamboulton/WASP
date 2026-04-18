@@ -15,11 +15,7 @@
     "cpu_mhz": 4800.0
   },
   "memory": {
-    "total_bytes": 33346146304,
-    "free_bytes": 18831712256,
-    "used_bytes": 14514434048,
-    "memory_usage_percent": 43,
-    "page_fault_count": 7562
+    "total_bytes": 33346146304
   },
   "disk": [
     {

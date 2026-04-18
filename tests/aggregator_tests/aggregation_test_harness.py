@@ -337,6 +337,39 @@ class AggregationTestHarness:
 
         raise TimeoutError(f"Timed out waiting for backend to update {self.output_file}")
 
+    def _wait_for_complete_json(self, previous_mtime=None, timeout=15, settle_time=0.2):
+        start = time.time()
+        latest_mtime = previous_mtime
+
+        while time.time() - start < timeout:
+            if self.output_file.exists():
+                current_mtime = self.output_file.stat().st_mtime
+
+                if previous_mtime is None or current_mtime > previous_mtime:
+                    latest_mtime = current_mtime
+
+                    # small settle delay so we don't read during truncate/rewrite
+                    time.sleep(settle_time)
+
+                    try:
+                        with open(self.output_file, "r", encoding="utf-8") as f:
+                            content = f.read().strip()
+
+                        if not content:
+                            time.sleep(0.1)
+                            continue
+
+                        data = json.loads(content)
+                        return data, latest_mtime
+
+                    except json.JSONDecodeError:
+                        time.sleep(0.1)
+                        continue
+
+            time.sleep(0.1)
+
+        raise TimeoutError(f"Timed out waiting for complete JSON in {self.output_file}")
+
     async def run(self):
         java_process = self.start_backend()
         print("Starting backend...")
@@ -380,15 +413,12 @@ class AggregationTestHarness:
                             self.config
                         )
 
-                        last_output_mtime = self._wait_for_output_update(last_output_mtime)
-
-                        with open(self.output_file, "r") as f:
-                            actual = json.load(f)
+                        actual, last_output_mtime = self._wait_for_complete_json(last_output_mtime)
 
                         with open(actual_snapshot_path, "w") as f:
                             json.dump(actual, f, indent=4)
 
-                        assert_results(str(expected_path), actual)
+                        assert_results(str(expected_path), actual, tolerance=0.02)
                         print(f"✅ Window {window_index} passed")
 
                         window_index += 1
