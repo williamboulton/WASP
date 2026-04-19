@@ -28,6 +28,7 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
 
       assertTrue(waitForProcessCount(60, 5000), "Timed out waiting for process DB writes");
       assertTrue(waitForCpuAggregate(5000), "Timed out waiting for aggregate DB writes");
+      assertTrue(waitForDiskCount(2, 5000), "Timed out waiting for disk aggregate writes");
 
       long ts = 1767225600000L;
       Integer diskCount = jdbcTemplate.queryForObject(
