@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -270,5 +272,87 @@ class MetricRepositoryTest {
     assertEquals(1, count);
     assertEquals(4.1, ghz);
     assertEquals(63.46, usage);
+  }
+
+  @Test
+  void insertCpuParsesEpochSecondsIsoAndNativeTimestampToSameKey() {
+    metricRepository.insertCpu("1735689600", 1000.0, 10.0);
+    metricRepository.insertCpu("2025-01-01T00:00:00Z", 2000.0, 20.0);
+    metricRepository.insertCpu("2025-01-01 00:00:00.000", 3000.0, 30.0);
+
+    Long timestampMs = 1735689600000L;
+    Integer count = jdbcTemplate.queryForObject(
+      "SELECT COUNT(*) FROM cpu WHERE timestamp_ms = ?",
+      Integer.class,
+      timestampMs
+    );
+    Double ghz = jdbcTemplate.queryForObject(
+      "SELECT cpu_ghz FROM cpu WHERE timestamp_ms = ?",
+      Double.class,
+      timestampMs
+    );
+    Double usage = jdbcTemplate.queryForObject(
+      "SELECT cpu_usage FROM cpu WHERE timestamp_ms = ?",
+      Double.class,
+      timestampMs
+    );
+
+    assertEquals(1, count);
+    assertEquals(3.0, ghz);
+    assertEquals(30.0, usage);
+  }
+
+  @Test
+  void insertProcessMapsKnownPrioritiesAndStoresUnknownAsNull() {
+    Map<String, Integer> expectedPriorities = Map.of(
+      "IDLE", 4,
+      "BELOW_NORMAL", 6,
+      "NORMAL", 8,
+      "ABOVE_NORMAL", 10,
+      "HIGH", 13,
+      "REALTIME", 24
+    );
+
+    int pid = 5000;
+    for (Map.Entry<String, Integer> entry : expectedPriorities.entrySet()) {
+      metricRepository.insertProcess(
+        "2026-01-01T00:00:00Z",
+        pid,
+        "p.exe",
+        "owner",
+        entry.getKey(),
+        1.0,
+        1L,
+        1.0,
+        "C:\\p.exe"
+      );
+      Integer persistedPriority = jdbcTemplate.queryForObject(
+        "SELECT priority FROM processes WHERE timestamp_ms = ? AND pid = ?",
+        Integer.class,
+        1767225600000L,
+        pid
+      );
+      assertEquals(entry.getValue(), persistedPriority);
+      pid++;
+    }
+
+    metricRepository.insertProcess(
+      "2026-01-01T00:00:00Z",
+      7000,
+      "unknown.exe",
+      "owner",
+      "NOT_A_PRIORITY",
+      1.0,
+      1L,
+      1.0,
+      "C:\\unknown.exe"
+    );
+    Integer unknownPriority = jdbcTemplate.queryForObject(
+      "SELECT priority FROM processes WHERE timestamp_ms = ? AND pid = ?",
+      Integer.class,
+      1767225600000L,
+      7000
+    );
+    assertNull(unknownPriority);
   }
 }
