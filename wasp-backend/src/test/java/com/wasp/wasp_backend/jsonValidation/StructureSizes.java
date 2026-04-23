@@ -48,7 +48,7 @@ class StructureSizes {
   void largerCpuCoresAfterInitializationShouldThrow() {
     MetricsAggregationService service = service();
 
-    service.ingest(cpu(), cores(2), memory(), disks(1));
+    service.ingest(cpu(), cores(2), memory(), disks(2));
 
     assertThrows(IllegalArgumentException.class, () ->
       service.ingest(cpu(), cores(4), memory(), disks(2))
@@ -70,7 +70,7 @@ class StructureSizes {
   void largerDiskAfterInitializationShouldThrow() {
     MetricsAggregationService service = service();
 
-    service.ingest(cpu(), cores(2), memory(), disks(2));
+    service.ingest(cpu(), cores(4), memory(), disks(2));
 
     assertThrows(IllegalArgumentException.class, () ->
       service.ingest(cpu(), cores(4), memory(), disks(4))
