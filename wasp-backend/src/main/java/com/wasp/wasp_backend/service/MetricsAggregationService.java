@@ -325,4 +325,12 @@ public class MetricsAggregationService {
     }
 
   }
+
+  /**
+   * Backwards-compatible overload for callers that do not provide processes.
+   */
+  public void ingest(CpuData cpuData, List<CpuCoreData> cpuCoreData, MemoryData memoryData,
+                     List<DiskData> diskData) {
+    ingest(cpuData, cpuCoreData, memoryData, diskData, List.of());
+  }
 }

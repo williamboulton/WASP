@@ -216,17 +216,19 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
     }
 
     // ---- PROCESSES (array of objects) ----
-    requireArray(processData, "processes");
-    for (int i = 0; i < processData.size(); i++) {
-      JsonNode process = processData.get(i);
-      requireObject(process, "processes[" + i + "]");
-      requireFields(process, "processes[" + i + "]",
-        "pid",
-        "name",
-        "cpu_percent",
-        "cpu_time_100ns",
-        "timestamp"
-      );
+    if (processData != null && !processData.isMissingNode() && !processData.isNull()) {
+      requireArray(processData, "processes");
+      for (int i = 0; i < processData.size(); i++) {
+        JsonNode process = processData.get(i);
+        requireObject(process, "processes[" + i + "]");
+        requireFields(process, "processes[" + i + "]",
+          "pid",
+          "name",
+          "cpu_percent",
+          "cpu_time_100ns",
+          "timestamp"
+        );
+      }
     }
   }
 
@@ -257,6 +259,7 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
       JsonNode memoryNode = root.path("memory");
       JsonNode diskNode = root.path("disk");
       JsonNode processesNode = root.path("processes");
+      boolean hasProcesses = !processesNode.isMissingNode() && !processesNode.isNull();
 
       // validation occurs after relay to reduce overhead
       validateMetricData(cpuNode, cpuCoresNode, memoryNode, diskNode, processesNode);
@@ -274,11 +277,14 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
         new TypeReference<>() {
         });
 
-      List<ProcessData> processes = objectMapper.convertValue(processesNode,
-        new TypeReference<>() {
-        });
-
-      metricsAggregationService.ingest(cpu, cpuCores, memory, disk, processes);
+      if (hasProcesses) {
+        List<ProcessData> processes = objectMapper.convertValue(processesNode,
+          new TypeReference<>() {
+          });
+        metricsAggregationService.ingest(cpu, cpuCores, memory, disk, processes);
+      } else {
+        metricsAggregationService.ingest(cpu, cpuCores, memory, disk);
+      }
 
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
