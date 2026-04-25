@@ -239,4 +239,62 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
       webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "done").join();
     }
   }
+
+  @Test
+  void websocketPrunesProcessRowsOlderThanTwoHours() throws Exception {
+    TestWebSocketListener listener = new TestWebSocketListener();
+    WebSocket webSocket = openSocket(listener);
+
+    try {
+      webSocket.sendText(payloadWithSingleProcess("2026-01-01T00:00:00Z", 9201, 3.0, 100000L), true).join();
+      assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for initial process DB write");
+
+      webSocket.sendText(payloadWithSingleProcess("2026-01-01T03:00:00Z", 9202, 5.0, 200000L), true).join();
+      long deadline = System.currentTimeMillis() + 5000;
+      boolean prunedStateObserved = false;
+      while (System.currentTimeMillis() < deadline) {
+        Integer totalProcessCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM processes", Integer.class);
+        Integer oldProcessCount = jdbcTemplate.queryForObject(
+          "SELECT COUNT(*) FROM processes WHERE pid = ?",
+          Integer.class,
+          9201
+        );
+        Integer recentProcessCount = jdbcTemplate.queryForObject(
+          "SELECT COUNT(*) FROM processes WHERE pid = ?",
+          Integer.class,
+          9202
+        );
+        if (totalProcessCount != null
+          && oldProcessCount != null
+          && recentProcessCount != null
+          && totalProcessCount == 1
+          && oldProcessCount == 0
+          && recentProcessCount == 1) {
+          prunedStateObserved = true;
+          break;
+        }
+        Thread.sleep(50);
+      }
+      assertTrue(prunedStateObserved, "Timed out waiting for 2-hour process pruning");
+
+      Integer totalProcessCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM processes", Integer.class);
+      Integer oldProcessCount = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM processes WHERE pid = ?",
+        Integer.class,
+        9201
+      );
+      Integer recentProcessCount = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM processes WHERE pid = ?",
+        Integer.class,
+        9202
+      );
+
+      assertEquals(1, totalProcessCount);
+      assertEquals(0, oldProcessCount);
+      assertEquals(1, recentProcessCount);
+      assertNull(listener.error.get(), () -> "WebSocket listener error: " + listener.error.get());
+    } finally {
+      webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "done").join();
+    }
+  }
 }
