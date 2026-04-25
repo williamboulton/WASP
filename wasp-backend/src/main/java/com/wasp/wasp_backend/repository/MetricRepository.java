@@ -13,6 +13,7 @@ import java.time.format.DateTimeParseException;
 public class MetricRepository {
   private static final DateTimeFormatter NATIVE_TIMESTAMP_FORMAT =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+  private static final long RETENTION_WINDOW_MS = 2 * 60 * 60 * 1000L;
 
   private final JdbcTemplate jdbc;
 
@@ -43,6 +44,7 @@ public class MetricRepository {
       cpuGhz,
       round(cpuUsagePercent)
     );
+    pruneTableOlderThan("cpu", timestampMs);
   }
 
   public void insertCpuCore(String timestamp, int coreIndex, double coreMhz, double coreUsagePercent) {
@@ -55,6 +57,7 @@ public class MetricRepository {
       coreGhz,
       round(coreUsagePercent)
     );
+    pruneTableOlderThan("cpu_cores", timestampMs);
   }
 
   public void insertMemory(String timestamp, double totalBytes, double freeBytes, double usedBytes,
@@ -69,6 +72,7 @@ public class MetricRepository {
       round(memoryUsagePercent),
       Math.round(pageFaults)
     );
+    pruneTableOlderThan("memory", timestampMs);
   }
 
   public void insertDisk(String timestamp, String driveLetter, double totalSpace, double freeSpace,
@@ -83,6 +87,7 @@ public class MetricRepository {
       round(readSpeed),
       round(writeSpeed)
     );
+    pruneTableOlderThan("disk", timestampMs);
   }
 
   public void insertProcess(String timestamp, int pid, String name, String owner, String priority,
@@ -100,6 +105,7 @@ public class MetricRepository {
       round(memPercent),
       (location == null || location.isBlank()) ? null : location
     );
+    pruneTableOlderThan("processes", timestampMs);
   }
 
   private long parseTimestampMillis(String timestamp) {
@@ -156,5 +162,13 @@ public class MetricRepository {
         default -> null;
       };
     }
+  }
+
+  private void pruneTableOlderThan(String tableName, long referenceTimestampMs) {
+    long cutoffTimestampMs = referenceTimestampMs - RETENTION_WINDOW_MS;
+    if (cutoffTimestampMs <= 0) {
+      return;
+    }
+    jdbc.update("DELETE FROM " + tableName + " WHERE timestamp_ms < ?", cutoffTimestampMs);
   }
 }
