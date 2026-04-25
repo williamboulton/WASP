@@ -4,6 +4,7 @@ import com.wasp.wasp_backend.dto.CpuCoreData;
 import com.wasp.wasp_backend.dto.CpuData;
 import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
+import com.wasp.wasp_backend.dto.ProcessData;
 import com.wasp.wasp_backend.repository.MetricRepository;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -140,49 +141,91 @@ public class MetricsAggregationService {
    * @author Patrick Muller
    */
   private void emitAggregatedMetrics() {
+    double aggCpuMhz = avg(runningCpuTotals.getCpu_mhz());
+    double aggCpuUsage = avg(runningCpuTotals.getCpu_usage_percent());
+    double aggCpuSystemResp = avg(runningCpuTotals.getSystem_responsiveness_percent());
+
+    // Persist CPU aggregate to DB
+    metricRepository.insertCpu(runningCpuTotals.getTimestamp(), aggCpuMhz, aggCpuUsage);
+
     Map<String, Object> root = new HashMap<>();
-
-    // CPU
     Map<String, Object> cpu = new HashMap<>();
-    cpu.put("cpu_mhz", avg(runningCpuTotals.getCpu_mhz()));
-    cpu.put("cpu_usage_percent", avg(runningCpuTotals.getCpu_usage_percent()));
-    cpu.put("system_responsiveness_percent", avg(runningCpuTotals.getSystem_responsiveness_percent()));
+    cpu.put("cpu_mhz", aggCpuMhz);
+    cpu.put("cpu_usage_percent", aggCpuUsage);
+    cpu.put("system_responsiveness_percent", aggCpuSystemResp);
     cpu.put("timestamp", runningCpuTotals.getTimestamp());
-
     root.put("cpu", cpu);
 
     List<Map<String, Object>> cores = new ArrayList<>();
     for (CpuCoreData core : runningCoreTotals) {
+      double aggCpuCoreMhz = avg(core.getCore_mhz());
+      double aggCpuCoreUsage = avg(core.getCore_usage_percent());
+
+      // Persist per-core aggregate to DB
+      metricRepository.insertCpuCore(
+        core.getTimestamp(),
+        core.getCore_index(),
+        aggCpuCoreMhz,
+        aggCpuCoreUsage
+      );
+
       Map<String, Object> coreMap = new HashMap<>();
       coreMap.put("core_index", core.getCore_index());
-      coreMap.put("core_mhz", avg(core.getCore_mhz()));
-      coreMap.put("core_usage_percent", avg(core.getCore_usage_percent()));
+      coreMap.put("core_mhz", aggCpuCoreMhz);
+      coreMap.put("core_usage_percent", aggCpuCoreUsage);
       coreMap.put("timestamp", core.getTimestamp());
       cores.add(coreMap);
     }
 
     root.put("cpu_cores", cores);
+    double aggMemTotalBytes = avg((double) runningMemTotals.getTotal_bytes());
+    double aggMemFreeBytes = avg((double) runningMemTotals.getFree_bytes());
+    double aggMemUsedBytes = avg((double) runningMemTotals.getUsed_bytes());
+    double aggMemUsagePercent = avg(runningMemTotals.getMemory_usage_percent());
+    double aggMemPageFaultCount = avg((double) runningMemTotals.getPage_fault_count());
 
-    // Memory
+    // Persist memory aggregate to DB
+    metricRepository.insertMemory(
+      runningMemTotals.getTimestamp(),
+      aggMemTotalBytes,
+      aggMemFreeBytes,
+      aggMemUsedBytes,
+      aggMemUsagePercent,
+      aggMemPageFaultCount
+    );
+
     Map<String, Object> memory = new HashMap<>();
-    memory.put("total_bytes", avg((double) runningMemTotals.getTotal_bytes()));
-    memory.put("free_bytes", avg((double) runningMemTotals.getFree_bytes()));
-    memory.put("used_bytes", avg((double) runningMemTotals.getUsed_bytes()));
-    memory.put("memory_usage_percent", avg(runningMemTotals.getMemory_usage_percent()));
-    memory.put("page_fault_count", avg((double) runningMemTotals.getPage_fault_count()));
+    memory.put("total_bytes", aggMemTotalBytes);
+    memory.put("free_bytes", aggMemFreeBytes);
+    memory.put("used_bytes", aggMemUsedBytes);
+    memory.put("memory_usage_percent", aggMemUsagePercent);
+    memory.put("page_fault_count", aggMemPageFaultCount);
     memory.put("timestamp", runningMemTotals.getTimestamp());
-
     root.put("memory", memory);
 
-    // Disk
     List<Map<String, Object>> disks = new ArrayList<>();
     for (DiskData disk : runningDiskTotals) {
+      double aggDiskTotalBytes = avg((double) disk.getTotal_bytes());
+      double aggDiskFreeBytes = avg((double) disk.getFree_bytes());
+      double aggDiskReadSpeed = avg(disk.getRead_speed_bytes_per_sec());
+      double aggDiskWriteSpeed = avg(disk.getWrite_speed_bytes_per_sec());
+
+      // Persist disk aggregate to DB
+      metricRepository.insertDisk(
+        disk.getTimestamp(),
+        disk.getDrive_letter(),
+        aggDiskTotalBytes,
+        aggDiskFreeBytes,
+        aggDiskReadSpeed,
+        aggDiskWriteSpeed
+      );
+
       Map<String, Object> diskMap = new HashMap<>();
       diskMap.put("drive", disk.getDrive_letter());
-      diskMap.put("total_bytes", avg((double) disk.getTotal_bytes()));
-      diskMap.put("free_bytes", avg((double) disk.getFree_bytes()));
-      diskMap.put("read_speed", avg(disk.getRead_speed_bytes_per_sec()));
-      diskMap.put("write_speed", avg(disk.getWrite_speed_bytes_per_sec()));
+      diskMap.put("total_bytes", aggDiskTotalBytes);
+      diskMap.put("free_bytes", aggDiskFreeBytes);
+      diskMap.put("read_speed", aggDiskReadSpeed);
+      diskMap.put("write_speed", aggDiskWriteSpeed);
       diskMap.put("timestamp", disk.getTimestamp());
       disks.add(diskMap);
     }
@@ -191,9 +234,8 @@ public class MetricsAggregationService {
 
     // Write JSON file
     try {
-      new JsonMapper();
       JsonMapper mapper = JsonMapper.builder()
-        .enable(SerializationFeature.INDENT_OUTPUT) // pretty print
+        .enable(SerializationFeature.INDENT_OUTPUT)
         .build();
 
       File outputFile = new File("output/", "output.json");
@@ -216,6 +258,22 @@ public class MetricsAggregationService {
     return Math.round(total / sampleCount * 100.0) / 100.0;
   }
 
+  private void persistProcesses(List<ProcessData> processData) {
+    for (ProcessData process : processData) {
+      metricRepository.insertProcess(
+        process.getTimestamp(),
+        process.getPid(),
+        process.getName(),
+        process.getOwner(),
+        process.getPriority(),
+        process.getCpu_percent(),
+        process.getCpu_time_100ns(),
+        process.getMem_percent(),
+        process.getLocation()
+      );
+    }
+  }
+
 
   /**
    * Aggregate current payload, emit and reset when window size is reached.
@@ -223,9 +281,11 @@ public class MetricsAggregationService {
    * @param cpuCoreData New cpu core data
    * @param memoryData New memory data
    * @param diskData New disk data
+   * @param processData New process data
    * @author Patrick Muller
    */
-  public void ingest(CpuData cpuData, List<CpuCoreData> cpuCoreData, MemoryData memoryData, List<DiskData> diskData) {
+  public void ingest(CpuData cpuData, List<CpuCoreData> cpuCoreData, MemoryData memoryData,
+                     List<DiskData> diskData, List<ProcessData> processData) {
     // initialize collections
     if (runningCoreTotals == null) {
       runningCoreTotals = new ArrayList<>(cpuCoreData.size());
@@ -254,6 +314,7 @@ public class MetricsAggregationService {
       resetState(cpuData, cpuCoreData, memoryData, diskData);
 
     accumulate(cpuData, cpuCoreData, memoryData, diskData);
+    persistProcesses(processData);
 
     sampleCount++;
 

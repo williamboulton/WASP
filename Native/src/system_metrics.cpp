@@ -545,6 +545,7 @@ struct ProcessMetrics {
     std::string priority;
     double cpuPercent;
     ULONGLONG cpuTime100ns;
+    double memPercent;
     std::string location;
 };
 
@@ -557,6 +558,15 @@ static std::vector<ProcessMetrics> GetProcessMetrics() {
     uK.LowPart = ftKernel.dwLowDateTime; uK.HighPart = ftKernel.dwHighDateTime;
     uU.LowPart = ftUser.dwLowDateTime;   uU.HighPart = ftUser.dwHighDateTime;
     ULONGLONG totalSystem = uK.QuadPart + uU.QuadPart;
+
+    // Use total physical memory to compute per-process memory percentage.
+    MEMORYSTATUSEX ms = {};
+    ms.dwLength = sizeof(ms);
+    ULONGLONG totalPhysicalBytes = 0;
+    if (GlobalMemoryStatusEx(&ms)) {
+        totalPhysicalBytes = ms.ullTotalPhys;
+    }
+
     std::vector<ProcessMetrics> list;
     HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnap == INVALID_HANDLE_VALUE) return list;
@@ -571,6 +581,7 @@ static std::vector<ProcessMetrics> GetProcessMetrics() {
         pm.priority = "NORMAL";
         pm.cpuPercent = 0.0;
         pm.cpuTime100ns = 0;
+        pm.memPercent = 0.0;
         pm.location = "";
         HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_QUERY_LIMITED_INFORMATION,
             FALSE, pe.th32ProcessID);
@@ -593,6 +604,12 @@ static std::vector<ProcessMetrics> GetProcessMetrics() {
                 }
                 prevTimes[pm.pid] = { pm.cpuTime100ns, 0 };
             }
+
+            PROCESS_MEMORY_COUNTERS pmc = {};
+            if (GetProcessMemoryInfo(hProc, &pmc, sizeof(pmc)) && totalPhysicalBytes > 0) {
+                pm.memPercent = 100.0 * static_cast<double>(pmc.WorkingSetSize) / static_cast<double>(totalPhysicalBytes);
+            }
+
             char path[MAX_PATH] = {};
             if (GetModuleFileNameExA(hProc, nullptr, path, MAX_PATH))
                 pm.location = path;
@@ -640,7 +657,8 @@ static std::string FormatMetricsJsonCompact(const CpuData& cpu, const std::vecto
         const auto& p = processes[i];
         if (i) js << ",";
         js << "{\"pid\": " << p.pid << ", \"name\": \"" << JsonEscape(p.name) << "\", \"owner\": \"" << JsonEscape(p.owner) << "\", \"priority\": \"" << JsonEscape(p.priority)
-           << "\", \"cpu_percent\": " << p.cpuPercent << ", \"cpu_time_100ns\": " << p.cpuTime100ns << ", \"location\": \"" << JsonEscape(p.location)
+           << "\", \"cpu_percent\": " << p.cpuPercent << ", \"cpu_time_100ns\": " << p.cpuTime100ns << ", \"mem_percent\": " << p.memPercent
+           << ", \"location\": \"" << JsonEscape(p.location)
            << "\", \"timestamp\": \"" << JsonEscape(procTs) << "\"}";
     }
     js << "]\n}\n";
@@ -687,6 +705,7 @@ static std::string FormatMetricsJsonPretty(const CpuData& cpu, const std::vector
         js << "    {\n      \"pid\": " << p.pid << ",\n      \"name\": \"" << JsonEscape(p.name)
            << "\",\n      \"owner\": \"" << JsonEscape(p.owner) << "\",\n      \"priority\": \"" << JsonEscape(p.priority)
            << "\",\n      \"cpu_percent\": " << p.cpuPercent << ",\n      \"cpu_time_100ns\": " << p.cpuTime100ns
+           << ",\n      \"mem_percent\": " << p.memPercent
            << ",\n      \"location\": \"" << JsonEscape(p.location) << "\",\n      \"timestamp\": \"" << JsonEscape(procTs) << "\"\n    }";
         js << (i + 1 < processes.size() ? ",\n" : "\n");
     }
