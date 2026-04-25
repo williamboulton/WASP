@@ -8,7 +8,6 @@
 const WS_URL = "ws://localhost:8080/ws/metrics";
 
 const connectionStatusEl = document.getElementById("connectionStatus");
-const statusIndicatorEl = document.querySelector(".status-indicator");
 const currentDateEl = document.getElementById("currentDate");
 const themeToggleBtn = document.getElementById("themeToggle");
 const totalCpuValueEl = document.getElementById("totalCpuValue");
@@ -130,11 +129,6 @@ const MAX_POINTS = 30; // ~25-30 seconds at 1s updates
 function setConnectionStatus(text, cssClass) {
   connectionStatusEl.textContent = text;
   connectionStatusEl.className = cssClass;
-  if (statusIndicatorEl) {
-    const connected = cssClass === "status-ok";
-    statusIndicatorEl.classList.toggle("connected", connected);
-    statusIndicatorEl.classList.toggle("disconnected", !connected);
-  }
 }
 
 /**
