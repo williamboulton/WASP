@@ -13,6 +13,8 @@ import java.time.format.DateTimeParseException;
 public class MetricRepository {
   private static final DateTimeFormatter NATIVE_TIMESTAMP_FORMAT =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+  // 2 hours in milliseconds
   private static final long RETENTION_WINDOW_MS = 2 * 60 * 60 * 1000L;
 
   private final JdbcTemplate jdbc;
