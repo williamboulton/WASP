@@ -401,8 +401,19 @@ body.light-theme .sidebar-footer {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  /* Default state: not connected yet */
+  background: #e53935;
+  box-shadow: 0 0 4px rgba(229, 57, 53, 0.9);
+}
+
+.status-indicator.connected {
   background: #4caf50;
   box-shadow: 0 0 4px rgba(76, 175, 80, 0.9);
+}
+
+.status-indicator.disconnected {
+  background: #e53935;
+  box-shadow: 0 0 4px rgba(229, 57, 53, 0.9);
 }
 
 .sidebar-date {

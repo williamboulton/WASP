@@ -1,0 +1,43 @@
+{
+  "jar_path": "../../wasp-backend/target/wasp-backend-0.0.1-SNAPSHOT.jar",
+  "api_url": "http://localhost:8080/api",
+  "ws_url": "ws://localhost:8080/ws/metrics",
+  "payload_count": 1500,
+  "aggregation_window_size": 60,
+  "cpu_cores": {
+    "count": 16,
+    "core_mhz": 4800
+  },
+  "cpu": {
+    "system_responsiveness_percent": 99.9,
+    "base_usage": 50.0,
+    "variance": 10.0,
+    "cpu_mhz": 4800.0
+  },
+  "memory": {
+    "total_bytes": 33346146304
+  },
+  "disk": [
+    {
+      "drive_letter": "C:",
+      "total_bytes": 1999392206848,
+      "free_bytes": 1012803956736,
+      "read_speed_bytes_per_sec": 5331,
+      "write_speed_bytes_per_sec": 45314
+    },
+    {
+      "drive_letter": "D:",
+      "total_bytes": 1000196800512,
+      "free_bytes": 452141776896,
+      "read_speed_bytes_per_sec": 5331,
+      "write_speed_bytes_per_sec": 45314
+    },
+    {
+      "drive_letter": "E:",
+      "total_bytes": 5000924233728,
+      "free_bytes": 228360768716,
+      "read_speed_bytes_per_sec": 5331,
+      "write_speed_bytes_per_sec": 45314
+    }
+  ]
+}
