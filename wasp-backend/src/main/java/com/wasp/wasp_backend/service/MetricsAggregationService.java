@@ -299,16 +299,28 @@ public class MetricsAggregationService {
         runningDiskTotals.add(new DiskData());
     }
 
+    // If the number of CPU cores or disks change from a new incoming payload,
+    // set the collection to the size of the new payload, reset agg. window
     if (cpuCoreData.size() != runningCoreTotals.size()) {
-      throw new IllegalArgumentException(
-        "cpu_cores length changed from " + runningCoreTotals.size() + " to " + cpuCoreData.size());
+      runningCoreTotals = new ArrayList<>(cpuCoreData.size());
+      for (int i = 0; i < cpuCoreData.size(); i++) {
+        runningCoreTotals.add(new CpuCoreData());
+      }
+      sampleCount = 0;
     }
 
     if (diskData.size() != runningDiskTotals.size()) {
-      throw new IllegalArgumentException(
-        "disk length changed from " + runningDiskTotals.size() + " to " + diskData.size());
+      runningDiskTotals = new ArrayList<>(diskData.size());
+      for (int i = 0; i < diskData.size(); i++) {
+        runningDiskTotals.add(new DiskData());
+      }
+      sampleCount = 0;
     }
 
+    // reset aggregated data after window is complete or size changed
+    if (sampleCount == 0) {
+      resetState(cpuData, cpuCoreData, memoryData, diskData);
+    }
     // reset aggregated data after window is complete
     if (sampleCount == 0)
       resetState(cpuData, cpuCoreData, memoryData, diskData);
