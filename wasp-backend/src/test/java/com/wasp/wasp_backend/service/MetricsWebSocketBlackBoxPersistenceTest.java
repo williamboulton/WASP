@@ -26,7 +26,7 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
         webSocket.sendText(payloadWithTwoDisks(i), true).join();
       }
 
-      assertTrue(waitForProcessCount(60, 5000), "Timed out waiting for process DB writes");
+      assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for process DB writes");
       assertTrue(waitForCpuAggregate(5000), "Timed out waiting for aggregate DB writes");
       assertTrue(waitForDiskCount(2, 5000), "Timed out waiting for disk aggregate writes");
 
@@ -56,9 +56,9 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
         ts,
         "C:"
       );
-      assertEquals(297_050_000_000L, cFreeSpace);
-      assertEquals(1_002_950.0, cReadSpeed);
-      assertEquals(502_950.0, cWriteSpeed);
+      assertEquals(299_550_000_000L, cFreeSpace);
+      assertEquals(1_000_450.0, cReadSpeed);
+      assertEquals(500_450.0, cWriteSpeed);
 
       Long dFreeSpace = jdbcTemplate.queryForObject(
         "SELECT free_space FROM disk WHERE timestamp_ms = ? AND drive_letter = ?",
@@ -78,9 +78,9 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
         ts,
         "D:"
       );
-      assertEquals(698_525_000_000L, dFreeSpace);
-      assertEquals(2_001_475.0, dReadSpeed);
-      assertEquals(1_251_475.0, dWriteSpeed);
+      assertEquals(699_775_000_000L, dFreeSpace);
+      assertEquals(2_000_225.0, dReadSpeed);
+      assertEquals(1_250_225.0, dWriteSpeed);
       assertNull(listener.error.get(), () -> "WebSocket listener error: " + listener.error.get());
     } finally {
       webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "done").join();
@@ -93,7 +93,7 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
     WebSocket webSocket = openSocket(listener);
 
     try {
-      webSocket.sendText(payloadWithPriorityMatrix(), true).join();
+      sendRepeatedPayload(webSocket, payloadWithPriorityMatrix(), 60);
       assertTrue(waitForProcessCount(4, 5000), "Timed out waiting for process DB writes");
 
       Integer highPriority = jdbcTemplate.queryForObject(
@@ -123,7 +123,7 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
       assertEquals(24, realtimePriority);
       assertEquals(10, numericPriority);
       assertNull(unknownPriority);
-      assertEquals(0, cpuAggregates);
+      assertEquals(1, cpuAggregates);
       assertNull(listener.error.get(), () -> "WebSocket listener error: " + listener.error.get());
     } finally {
       webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "done").join();
@@ -136,27 +136,37 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
     WebSocket webSocket = openSocket(listener);
 
     try {
-      webSocket.sendText(payloadWithTimestampFormatVariants(), true).join();
+      sendRepeatedPayload(webSocket, payloadWithTimestampFormatVariants(), 60);
       assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for process DB writes");
 
-      Integer count = jdbcTemplate.queryForObject(
-        "SELECT COUNT(*) FROM processes WHERE timestamp_ms = ? AND pid = ?",
-        Integer.class,
-        1735689600000L,
-        9001
-      );
-      Double cpuPercent = jdbcTemplate.queryForObject(
-        "SELECT cpu_percent FROM processes WHERE timestamp_ms = ? AND pid = ?",
-        Double.class,
-        1735689600000L,
-        9001
-      );
-      Long cpuTime = jdbcTemplate.queryForObject(
-        "SELECT cpu_time FROM processes WHERE timestamp_ms = ? AND pid = ?",
-        Long.class,
-        1735689600000L,
-        9001
-      );
+      long deadline = System.currentTimeMillis() + 5000;
+      Integer count = null;
+      Double cpuPercent = null;
+      Long cpuTime = null;
+      while (System.currentTimeMillis() < deadline) {
+        count = jdbcTemplate.queryForObject(
+          "SELECT COUNT(*) FROM processes WHERE timestamp_ms = ? AND pid = ?",
+          Integer.class,
+          1735689600000L,
+          9001
+        );
+        cpuPercent = jdbcTemplate.queryForObject(
+          "SELECT cpu_percent FROM processes WHERE timestamp_ms = ? AND pid = ?",
+          Double.class,
+          1735689600000L,
+          9001
+        );
+        cpuTime = jdbcTemplate.queryForObject(
+          "SELECT cpu_time FROM processes WHERE timestamp_ms = ? AND pid = ?",
+          Long.class,
+          1735689600000L,
+          9001
+        );
+        if (count != null && count == 1 && cpuPercent != null && cpuPercent == 7.0 && cpuTime != null && cpuTime == 300000L) {
+          break;
+        }
+        Thread.sleep(50);
+      }
 
       assertEquals(1, count);
       assertEquals(7.0, cpuPercent);
@@ -173,28 +183,38 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
     WebSocket webSocket = openSocket(listener);
 
     try {
-      webSocket.sendText(payloadWithSingleProcess("2026-01-01T00:00:00Z", 9010, 4.0, 100000L), true).join();
-      webSocket.sendText(payloadWithSingleProcess("2026-01-01T00:00:00Z", 9010, 9.0, 900000L), true).join();
+      sendRepeatedPayload(webSocket, payloadWithSingleProcess("2026-01-01T00:00:00Z", 9010, 4.0, 100000L), 60);
+      sendRepeatedPayload(webSocket, payloadWithSingleProcess("2026-01-01T00:00:00Z", 9010, 9.0, 900000L), 60);
       assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for process DB writes");
 
-      Integer count = jdbcTemplate.queryForObject(
-        "SELECT COUNT(*) FROM processes WHERE timestamp_ms = ? AND pid = ?",
-        Integer.class,
-        1767225600000L,
-        9010
-      );
-      Double cpuPercent = jdbcTemplate.queryForObject(
-        "SELECT cpu_percent FROM processes WHERE timestamp_ms = ? AND pid = ?",
-        Double.class,
-        1767225600000L,
-        9010
-      );
-      Long cpuTime = jdbcTemplate.queryForObject(
-        "SELECT cpu_time FROM processes WHERE timestamp_ms = ? AND pid = ?",
-        Long.class,
-        1767225600000L,
-        9010
-      );
+      long deadline = System.currentTimeMillis() + 5000;
+      Integer count = null;
+      Double cpuPercent = null;
+      Long cpuTime = null;
+      while (System.currentTimeMillis() < deadline) {
+        count = jdbcTemplate.queryForObject(
+          "SELECT COUNT(*) FROM processes WHERE timestamp_ms = ? AND pid = ?",
+          Integer.class,
+          1767225600000L,
+          9010
+        );
+        cpuPercent = jdbcTemplate.queryForObject(
+          "SELECT cpu_percent FROM processes WHERE timestamp_ms = ? AND pid = ?",
+          Double.class,
+          1767225600000L,
+          9010
+        );
+        cpuTime = jdbcTemplate.queryForObject(
+          "SELECT cpu_time FROM processes WHERE timestamp_ms = ? AND pid = ?",
+          Long.class,
+          1767225600000L,
+          9010
+        );
+        if (count != null && count == 1 && cpuPercent != null && cpuPercent == 9.0 && cpuTime != null && cpuTime == 900000L) {
+          break;
+        }
+        Thread.sleep(50);
+      }
 
       assertEquals(1, count);
       assertEquals(9.0, cpuPercent);
@@ -211,7 +231,7 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
     WebSocket webSocket = openSocket(listener);
 
     try {
-      webSocket.sendText(payloadWithMixedValidAndInvalidProcessTimestamps(), true).join();
+      sendRepeatedPayload(webSocket, payloadWithMixedValidAndInvalidProcessTimestamps(), 60);
       assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for process DB writes");
       assertTrue(
         waitForMessageContains(listener, "\"code\":\"INVALID_FORMAT\"", 3000),
@@ -246,10 +266,10 @@ class MetricsWebSocketBlackBoxPersistenceTest extends MetricsWebSocketBlackBoxTe
     WebSocket webSocket = openSocket(listener);
 
     try {
-      webSocket.sendText(payloadWithSingleProcess("2026-01-01T00:00:00Z", 9201, 3.0, 100000L), true).join();
+      sendRepeatedPayload(webSocket, payloadWithSingleProcess("2026-01-01T00:00:00Z", 9201, 3.0, 100000L), 60);
       assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for initial process DB write");
 
-      webSocket.sendText(payloadWithSingleProcess("2026-01-01T03:00:00Z", 9202, 5.0, 200000L), true).join();
+      sendRepeatedPayload(webSocket, payloadWithSingleProcess("2026-01-01T03:00:00Z", 9202, 5.0, 200000L), 60);
       long deadline = System.currentTimeMillis() + 5000;
       boolean prunedStateObserved = false;
       while (System.currentTimeMillis() < deadline) {

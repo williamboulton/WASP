@@ -17,7 +17,7 @@ import java.util.List;
 class StructureSizes {
 
   private MetricsAggregationService service() {
-    return new MetricsAggregationService(mock(MetricRepository.class));
+    return new MetricsAggregationService(mock(MetricRepository.class), 10, 60);
   }
 
   @Test

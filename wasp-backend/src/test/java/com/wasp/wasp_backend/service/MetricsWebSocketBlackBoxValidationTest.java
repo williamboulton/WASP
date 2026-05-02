@@ -7,6 +7,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.net.http.WebSocket;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -40,12 +41,12 @@ class MetricsWebSocketBlackBoxValidationTest extends MetricsWebSocketBlackBoxTes
   }
 
   @Test
-  void websocketRejectsInvalidTimestampAndDoesNotWriteDatabaseRows() throws Exception {
+  void websocketRejectsInvalidTimestampWhenProcessWriteWindowCompletes() throws Exception {
     TestWebSocketListener listener = new TestWebSocketListener();
     WebSocket webSocket = openSocket(listener);
 
     try {
-      webSocket.sendText(payloadWithInvalidProcessTimestamp(), true).join();
+      sendRepeatedPayload(webSocket, payloadWithInvalidProcessTimestamp(), 60);
 
       assertTrue(
         waitForMessageContains(listener, "\"type\":\"error\"", 3000),
@@ -56,7 +57,8 @@ class MetricsWebSocketBlackBoxValidationTest extends MetricsWebSocketBlackBoxTes
         "Expected INVALID_FORMAT error code for invalid timestamp"
       );
 
-      assertNoRowsPersisted();
+      Integer processCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM processes", Integer.class);
+      assertEquals(0, processCount);
       assertNull(listener.error.get(), () -> "WebSocket listener error: " + listener.error.get());
     } finally {
       webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "done").join();

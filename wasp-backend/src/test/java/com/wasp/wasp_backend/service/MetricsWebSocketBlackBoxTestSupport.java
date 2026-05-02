@@ -17,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 abstract class MetricsWebSocketBlackBoxTestSupport {
+  protected static final int METRICS_WINDOW_SIZE = 10;
+  protected static final int PROCESS_WINDOW_SIZE = 60;
 
   @LocalServerPort
   protected int port;
@@ -92,6 +94,12 @@ abstract class MetricsWebSocketBlackBoxTestSupport {
     int endExclusive = startIndexInclusive + count;
     for (int i = startIndexInclusive; i < endExclusive; i++) {
       webSocket.sendText(payload(i), true).join();
+    }
+  }
+
+  protected void sendRepeatedPayload(WebSocket webSocket, String payload, int count) {
+    for (int i = 0; i < count; i++) {
+      webSocket.sendText(payload, true).join();
     }
   }
 
