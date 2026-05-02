@@ -7,12 +7,16 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 @Repository
 public class MetricRepository {
+  
+  private static final ZoneId LOCAL_ZONE = ZoneId.systemDefault();
+
   private static final Logger log = LoggerFactory.getLogger(MetricRepository.class);
 
   private static final DateTimeFormatter NATIVE_TIMESTAMP_FORMAT =
@@ -152,11 +156,14 @@ public class MetricRepository {
       return Instant.parse(normalized).toEpochMilli();
     } catch (DateTimeParseException ignored) {
       try {
-        return LocalDateTime.parse(normalized).toInstant(ZoneOffset.UTC).toEpochMilli();
+        // Local date-time strings (no offset) are produced by the metrics collector.
+        // Interpret them in local system time so recent-window reports are accurate.
+        return LocalDateTime.parse(normalized).atZone(LOCAL_ZONE).toInstant().toEpochMilli();
       } catch (DateTimeParseException e) {
         try {
           return LocalDateTime.parse(normalized, NATIVE_TIMESTAMP_FORMAT)
-            .toInstant(ZoneOffset.UTC)
+            .atZone(LOCAL_ZONE)
+            .toInstant()
             .toEpochMilli();
         } catch (DateTimeParseException e2) {
           throw new IllegalArgumentException("Unable to parse timestamp: " + timestamp, e2);
