@@ -34,45 +34,61 @@ class StructureSizes {
   }
 
   @Test
-  void smallerCpuCoresAfterInitializationShouldThrow() {
+  void smallerCpuCoresAfterInitializationShouldResetAndContinue() {
     MetricsAggregationService service = service();
 
     service.ingest(cpu(), cores(4), memory(), disks(2));
 
-    assertThrows(IllegalArgumentException.class, () ->
+    assertDoesNotThrow(() ->
+      service.ingest(cpu(), cores(2), memory(), disks(2))
+    );
+
+    assertDoesNotThrow(() ->
       service.ingest(cpu(), cores(2), memory(), disks(2))
     );
   }
 
   @Test
-  void largerCpuCoresAfterInitializationShouldThrow() {
+  void largerCpuCoresAfterInitializationShouldResetAndContinue() {
     MetricsAggregationService service = service();
 
     service.ingest(cpu(), cores(2), memory(), disks(2));
 
-    assertThrows(IllegalArgumentException.class, () ->
+    assertDoesNotThrow(() ->
+      service.ingest(cpu(), cores(4), memory(), disks(2))
+    );
+
+    assertDoesNotThrow(() ->
       service.ingest(cpu(), cores(4), memory(), disks(2))
     );
   }
 
   @Test
-  void smallerDiskAfterInitializationShouldThrow() {
+  void smallerDiskAfterInitializationShouldResetAndContinue() {
     MetricsAggregationService service = service();
 
     service.ingest(cpu(), cores(4), memory(), disks(2));
 
-    assertThrows(IllegalArgumentException.class, () ->
+    assertDoesNotThrow(() ->
+      service.ingest(cpu(), cores(4), memory(), disks(1))
+    );
+
+    assertDoesNotThrow(() ->
       service.ingest(cpu(), cores(4), memory(), disks(1))
     );
   }
 
   @Test
-  void largerDiskAfterInitializationShouldThrow() {
+  void largerDiskAfterInitializationShouldResetAndContinue() {
     MetricsAggregationService service = service();
 
     service.ingest(cpu(), cores(4), memory(), disks(2));
 
-    assertThrows(IllegalArgumentException.class, () ->
+    assertDoesNotThrow(() ->
+      service.ingest(cpu(), cores(4), memory(), disks(4))
+    );
+
+    assertDoesNotThrow(() ->
       service.ingest(cpu(), cores(4), memory(), disks(4))
     );
   }
