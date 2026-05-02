@@ -6,6 +6,8 @@ import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
 import com.wasp.wasp_backend.dto.ProcessData;
 import com.wasp.wasp_backend.repository.MetricRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
@@ -20,10 +22,12 @@ import java.util.Map;
 @Service
 public class MetricsAggregationService {
 
-  // Size of aggregated metric window, 60 samples
-  private static final int WINDOW_SIZE = 60;
+  private final int metricsWindowSize;
+ 
+  private final int processWindowSize;
 
-  private int sampleCount = 0;
+  private int metricsSampleCount = 0;
+  private int processSampleCount = 0;
 
   private final CpuData runningCpuTotals = new CpuData();
 
@@ -33,10 +37,23 @@ public class MetricsAggregationService {
 
   private List<DiskData> runningDiskTotals;
 
-  private MetricRepository metricRepository;
+  private List<ProcessData> latestProcessSnapshot = List.of();
+
+  private final MetricRepository metricRepository;
 
   public MetricsAggregationService(MetricRepository metricRepository) {
+    this(metricRepository, 60, 1);
+  }
+
+  @Autowired
+  public MetricsAggregationService(
+    MetricRepository metricRepository,
+    @Value("${wasp.aggregation.metrics-window-size:60}") int metricsWindowSize,
+    @Value("${wasp.aggregation.process-window-size:1}") int processWindowSize
+  ) {
     this.metricRepository = metricRepository;
+    this.metricsWindowSize = Math.max(1, metricsWindowSize);
+    this.processWindowSize = Math.max(1, processWindowSize);
   }
 
   /**
@@ -255,7 +272,7 @@ public class MetricsAggregationService {
    * @author Patrick Muller
    */
   private double avg(double total) {
-    return Math.round(total / sampleCount * 100.0) / 100.0;
+    return Math.round(total / metricsSampleCount * 100.0) / 100.0;
   }
 
   private void persistProcesses(List<ProcessData> processData) {
@@ -306,7 +323,7 @@ public class MetricsAggregationService {
       for (int i = 0; i < cpuCoreData.size(); i++) {
         runningCoreTotals.add(new CpuCoreData());
       }
-      sampleCount = 0;
+      metricsSampleCount = 0;
     }
 
     if (diskData.size() != runningDiskTotals.size()) {
@@ -314,26 +331,30 @@ public class MetricsAggregationService {
       for (int i = 0; i < diskData.size(); i++) {
         runningDiskTotals.add(new DiskData());
       }
-      sampleCount = 0;
+      metricsSampleCount = 0;
     }
 
     // reset aggregated data after window is complete or size changed
-    if (sampleCount == 0) {
+    if (metricsSampleCount == 0) {
       resetState(cpuData, cpuCoreData, memoryData, diskData);
     }
-    // reset aggregated data after window is complete
-    if (sampleCount == 0)
-      resetState(cpuData, cpuCoreData, memoryData, diskData);
 
     accumulate(cpuData, cpuCoreData, memoryData, diskData);
-    persistProcesses(processData);
+    latestProcessSnapshot = new ArrayList<>(processData);
 
-    sampleCount++;
+    metricsSampleCount++;
+    processSampleCount++;
 
     // Emit metrics after window is full and reset count
-    if (sampleCount >= WINDOW_SIZE) {
+    if (metricsSampleCount >= metricsWindowSize) {
       emitAggregatedMetrics();
-      sampleCount = 0;
+      metricsSampleCount = 0;
+    }
+
+    // Persist latest process snapshot on a slower cadence.
+    if (processSampleCount >= processWindowSize) {
+      persistProcesses(latestProcessSnapshot);
+      processSampleCount = 0;
     }
 
   }

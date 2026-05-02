@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -193,7 +195,10 @@ class MetricRepositoryTest {
       ""
     );
 
-    Long timestampMs = 1767225600000L;
+    Long timestampMs = LocalDateTime.parse("2026-01-01T00:00:00")
+      .atZone(ZoneId.systemDefault())
+      .toInstant()
+      .toEpochMilli();
     Integer count = jdbcTemplate.queryForObject(
       "SELECT COUNT(*) FROM processes WHERE timestamp_ms = ? AND pid = ?",
       Integer.class,
@@ -275,31 +280,55 @@ class MetricRepositoryTest {
   }
 
   @Test
-  void insertCpuParsesEpochSecondsIsoAndNativeTimestampToSameKey() {
+  void insertCpuParsesEpochAndIsoToSameKeyAndTreatsNativeAsLocalTime() {
+    metricRepository.insertCpu("2025-01-01 00:00:00.000", 3000.0, 30.0);
     metricRepository.insertCpu("1735689600", 1000.0, 10.0);
     metricRepository.insertCpu("2025-01-01T00:00:00Z", 2000.0, 20.0);
-    metricRepository.insertCpu("2025-01-01 00:00:00.000", 3000.0, 30.0);
 
-    Long timestampMs = 1735689600000L;
-    Integer count = jdbcTemplate.queryForObject(
+    Long utcTimestampMs = 1735689600000L;
+    Long localTimestampMs = LocalDateTime.parse("2025-01-01T00:00:00")
+      .atZone(ZoneId.systemDefault())
+      .toInstant()
+      .toEpochMilli();
+
+    Integer utcCount = jdbcTemplate.queryForObject(
       "SELECT COUNT(*) FROM cpu WHERE timestamp_ms = ?",
       Integer.class,
-      timestampMs
+      utcTimestampMs
     );
-    Double ghz = jdbcTemplate.queryForObject(
+    Double utcGhz = jdbcTemplate.queryForObject(
       "SELECT cpu_ghz FROM cpu WHERE timestamp_ms = ?",
       Double.class,
-      timestampMs
+      utcTimestampMs
     );
-    Double usage = jdbcTemplate.queryForObject(
+    Double utcUsage = jdbcTemplate.queryForObject(
       "SELECT cpu_usage FROM cpu WHERE timestamp_ms = ?",
       Double.class,
-      timestampMs
+      utcTimestampMs
     );
 
-    assertEquals(1, count);
-    assertEquals(3.0, ghz);
-    assertEquals(30.0, usage);
+    Integer localCount = jdbcTemplate.queryForObject(
+      "SELECT COUNT(*) FROM cpu WHERE timestamp_ms = ?",
+      Integer.class,
+      localTimestampMs
+    );
+    Double localGhz = jdbcTemplate.queryForObject(
+      "SELECT cpu_ghz FROM cpu WHERE timestamp_ms = ?",
+      Double.class,
+      localTimestampMs
+    );
+    Double localUsage = jdbcTemplate.queryForObject(
+      "SELECT cpu_usage FROM cpu WHERE timestamp_ms = ?",
+      Double.class,
+      localTimestampMs
+    );
+
+    assertEquals(1, utcCount);
+    assertEquals(2.0, utcGhz);
+    assertEquals(20.0, utcUsage);
+    assertEquals(1, localCount);
+    assertEquals(3.0, localGhz);
+    assertEquals(30.0, localUsage);
   }
 
   @Test

@@ -29,7 +29,7 @@ class ValidJson{
   private MetricsWebSocketHandler handler;
 
   private MetricsAggregationService service() {
-    return new MetricsAggregationService(mock(MetricRepository.class));
+    return new MetricsAggregationService(mock(MetricRepository.class), 10, 60);
   }
 
   @BeforeEach

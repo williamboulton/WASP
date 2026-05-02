@@ -24,7 +24,7 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
     try {
       sendSamples(webSocket, 0, 60);
 
-      assertTrue(waitForProcessCount(60, 5000), "Timed out waiting for process DB writes");
+      assertTrue(waitForProcessCount(1, 5000), "Timed out waiting for process DB writes");
       assertTrue(waitForCpuAggregate(5000), "Timed out waiting for aggregate DB writes");
       assertTrue(waitForDiskCount(1, 5000), "Timed out waiting for disk aggregate writes");
 
@@ -58,7 +58,7 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
       assertEquals(2, coreCount);
       assertEquals(1, memoryCount);
       assertEquals(1, diskCount);
-      assertEquals(60, processCount);
+      assertEquals(1, processCount);
 
       Double cpuGhz = jdbcTemplate.queryForObject(
         "SELECT cpu_ghz FROM cpu WHERE timestamp_ms = ?",
@@ -70,7 +70,7 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
         Double.class,
         ts
       );
-      assertEquals(3.23, cpuGhz);
+      assertEquals(3.2, cpuGhz);
       assertEquals(29.5, cpuUsage);
 
       Double core0Ghz = jdbcTemplate.queryForObject(
@@ -97,9 +97,9 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
         ts,
         1
       );
-      assertEquals(3.13, core0Ghz);
+      assertEquals(3.1, core0Ghz);
       assertEquals(24.5, core0Usage);
-      assertEquals(3.33, core1Ghz);
+      assertEquals(3.3, core1Ghz);
       assertEquals(34.5, core1Usage);
 
       Long totalMem = jdbcTemplate.queryForObject(
@@ -128,10 +128,10 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
         ts
       );
       assertEquals(16_000_000_000L, totalMem);
-      assertEquals(5_970_500_000L, freeMem);
-      assertEquals(10_029_500_000L, usedMem);
-      assertEquals(63.5, memUsage);
-      assertEquals(1_030L, pageFaults);
+      assertEquals(5_995_500_000L, freeMem);
+      assertEquals(10_004_500_000L, usedMem);
+      assertEquals(63.4, memUsage);
+      assertEquals(1_005L, pageFaults);
 
       String driveLetter = jdbcTemplate.queryForObject(
         "SELECT drive_letter FROM disk WHERE timestamp_ms = ?",
@@ -160,21 +160,21 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
       );
       assertEquals("C:", driveLetter);
       assertEquals(512_000_000_000L, totalSpace);
-      assertEquals(297_050_000_000L, freeSpace);
-      assertEquals(1_002_950.0, readSpeed);
-      assertEquals(502_950.0, writeSpeed);
+      assertEquals(299_550_000_000L, freeSpace);
+      assertEquals(1_000_450.0, readSpeed);
+      assertEquals(500_450.0, writeSpeed);
 
       Integer priority = jdbcTemplate.queryForObject(
         "SELECT priority FROM processes WHERE timestamp_ms = ? AND pid = ?",
         Integer.class,
-        ts,
-        4242
+        1767225659000L,
+        4301
       );
       String owner = jdbcTemplate.queryForObject(
         "SELECT owner FROM processes WHERE timestamp_ms = ? AND pid = ?",
         String.class,
-        ts,
-        4242
+        1767225659000L,
+        4301
       );
       assertEquals(8, priority);
       assertNull(owner);
@@ -191,7 +191,7 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
 
     try {
       sendSamples(webSocket, 0, 59);
-      assertTrue(waitForProcessCount(59, 5000), "Timed out waiting for process writes");
+      Thread.sleep(200);
 
       Integer cpuCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cpu", Integer.class);
       Integer coreCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cpu_cores", Integer.class);
@@ -199,11 +199,11 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
       Integer diskCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM disk", Integer.class);
       Integer processCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM processes", Integer.class);
 
-      assertEquals(0, cpuCount);
-      assertEquals(0, coreCount);
-      assertEquals(0, memoryCount);
-      assertEquals(0, diskCount);
-      assertEquals(59, processCount);
+      assertEquals(5, cpuCount);
+      assertEquals(10, coreCount);
+      assertEquals(5, memoryCount);
+      assertEquals(5, diskCount);
+      assertEquals(0, processCount);
       assertNull(listener.error.get(), () -> "WebSocket listener error: " + listener.error.get());
     } finally {
       webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "done").join();
@@ -218,9 +218,9 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
     try {
       sendSamples(webSocket, 0, 120);
 
-      assertTrue(waitForProcessCount(120, 5000), "Timed out waiting for process DB writes");
-      assertTrue(waitForCpuAggregateCount(2, 5000), "Timed out waiting for two aggregate windows");
-      assertTrue(waitForDiskCount(2, 5000), "Timed out waiting for two disk aggregate windows");
+      assertTrue(waitForProcessCount(2, 5000), "Timed out waiting for process DB writes");
+      assertTrue(waitForCpuAggregateCount(12, 5000), "Timed out waiting for aggregate windows");
+      assertTrue(waitForDiskCount(12, 5000), "Timed out waiting for disk aggregate windows");
 
       Integer cpuCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cpu", Integer.class);
       Integer coreCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cpu_cores", Integer.class);
@@ -228,11 +228,11 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
       Integer diskCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM disk", Integer.class);
       Integer processCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM processes", Integer.class);
 
-      assertEquals(2, cpuCount);
-      assertEquals(4, coreCount);
-      assertEquals(2, memoryCount);
-      assertEquals(2, diskCount);
-      assertEquals(120, processCount);
+      assertEquals(12, cpuCount);
+      assertEquals(24, coreCount);
+      assertEquals(12, memoryCount);
+      assertEquals(12, diskCount);
+      assertEquals(2, processCount);
       assertNull(listener.error.get(), () -> "WebSocket listener error: " + listener.error.get());
 
       Integer window1CpuCount = jdbcTemplate.queryForObject(
@@ -243,7 +243,7 @@ class MetricsWebSocketBlackBoxHappyPathTest extends MetricsWebSocketBlackBoxTest
       Integer window2CpuCount = jdbcTemplate.queryForObject(
         "SELECT COUNT(*) FROM cpu WHERE timestamp_ms = ?",
         Integer.class,
-        1767225660000L
+        1767225610000L
       );
       assertEquals(1, window1CpuCount);
       assertEquals(1, window2CpuCount);
