@@ -172,6 +172,7 @@ public class MetricRepository {
     }
   }
 
+  // round to nearest hundredth, used for metrics that are stored as REAL in the database
   private double round(double value) {
     return Math.round(value * 100.0) / 100.0;
   }
@@ -202,6 +203,14 @@ public class MetricRepository {
     if (cutoffTimestampMs <= 0) {
       return;
     }
-    jdbc.update("DELETE FROM " + tableName + " WHERE timestamp_ms < ?", cutoffTimestampMs);
+    int deletedRows = jdbc.update("DELETE FROM " + tableName + " WHERE timestamp_ms < ?", cutoffTimestampMs);
+    if (deletedRows > 0) {
+      log.info(
+        "Pruned {} row(s) from {} older than timestamp_ms={}",
+        deletedRows,
+        tableName,
+        cutoffTimestampMs
+      );
+    }
   }
 }
