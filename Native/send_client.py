@@ -13,8 +13,8 @@ import time
 
 import websockets
 
-URI = "ws://localhost:8080/ws/metrics"
-JSON_PATH = "build/system_metrics_output.json"
+URI = "ws://backend:8080/ws/metrics"
+JSON_PATH = "system_metrics_output.json"
 # How often to push a fresh snapshot to the backend, in seconds.
 SEND_INTERVAL_SECONDS = 2.0
 
