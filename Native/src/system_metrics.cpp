@@ -827,6 +827,17 @@ static std::string GetExeDirectory() {
     return s;
 }
 
+static std::string GetServiceOutputPath() {
+    const char* programData = std::getenv("ProgramData");
+    if (!programData || programData[0] == '\0') {
+        return GetExeDirectory() + "system_metrics_output.json";
+    }
+
+    std::string dir = std::string(programData) + "\\WASP";
+    CreateDirectoryA(dir.c_str(), nullptr);
+    return dir + "\\system_metrics_output.json";
+}
+
 static VOID WINAPI SvcCtrlHandler(DWORD ctrl) {
     switch (ctrl) {
         case SERVICE_CONTROL_STOP:
@@ -886,7 +897,7 @@ static VOID WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
     ReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
     ReportSvcStatus(SERVICE_RUNNING);
 
-    std::string outPath = GetExeDirectory() + "system_metrics_output.json";
+    std::string outPath = GetServiceOutputPath();
     RunMetricsWriteLoop(outPath, &g_svcStopRequested);
     ReportSvcStatus(SERVICE_STOPPED);
 }

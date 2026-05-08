@@ -40,4 +40,10 @@ Name: "{autoprograms}\{#AppName}"; Filename: "{app}\WASPTray.exe"; IconFilename:
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\WASPTray.exe"; IconFilename: "{app}\WASPTray.exe"; Tasks: desktopicon
 
 [Run]
+Filename: "{app}\system_metrics.exe"; Parameters: "install"; Flags: runhidden waituntilterminated
+Filename: "sc.exe"; Parameters: "sdset SystemMetricsService ""D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWRPWPLOCRRC;;;IU)(A;;CCLCSWLOCRRC;;;SU)"""; Flags: runhidden waituntilterminated
 Filename: "{app}\WASPTray.exe"; Description: "Launch {#AppName}"; Flags: nowait postinstall skipifsilent
+
+[UninstallRun]
+Filename: "sc.exe"; Parameters: "stop SystemMetricsService"; Flags: runhidden waituntilterminated; RunOnceId: "StopSystemMetricsService"
+Filename: "{app}\system_metrics.exe"; Parameters: "remove"; Flags: runhidden waituntilterminated; RunOnceId: "RemoveSystemMetricsService"

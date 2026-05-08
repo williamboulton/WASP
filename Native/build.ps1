@@ -268,7 +268,7 @@ call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.
 "@
 
 $compileTrayCmd = @"
-call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\WASPTray.exe src\wasp_tray.cpp /link shell32.lib user32.lib
+call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\WASPTray.exe src\wasp_tray.cpp /link shell32.lib user32.lib advapi32.lib
 "@
 
 

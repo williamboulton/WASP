@@ -295,7 +295,7 @@ if errorlevel 1 goto :build_failed
 
 echo.
 echo Compiling wasp_tray.cpp...
-cl /EHsc /W4 /std:c++17 /Fe:build\WASPTray.exe src\wasp_tray.cpp /link shell32.lib user32.lib
+cl /EHsc /W4 /std:c++17 /Fe:build\WASPTray.exe src\wasp_tray.cpp /link shell32.lib user32.lib advapi32.lib
 if errorlevel 1 goto :build_failed
 
 
