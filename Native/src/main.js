@@ -277,6 +277,16 @@ function formatBytesToGiB(bytes) {
 }
 
 /**
+ * Formats a byte count as MiB with two decimal places.
+ * @param {number} bytes
+ * @returns {string}
+ */
+function formatBytesToMiB(bytes) {
+  if (typeof bytes !== "number") return "–";
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
+}
+
+/**
  * Formats a memory object field for display in the Memory details table.
  * Byte fields get raw + GiB; numbers get locale formatting; others stringify.
  * @param {string} key
@@ -370,10 +380,10 @@ function updateMemoryView(data) {
  * @returns {string}
  */
 function formatDiskField(key, value) {
+  if (typeof value === "number" && key.endsWith("_bytes_per_sec")) {
+    return `${value.toLocaleString()} (${formatBytesToMiB(value)})`;
+  }
   if (typeof value === "number" && key.endsWith("_bytes")) {
-    if (key.includes("speed")) {
-      return `${value.toLocaleString()} (${formatRate(value)})`;
-    }
     return `${value.toLocaleString()} (${formatBytesToGiB(value)})`;
   }
   if (typeof value === "number") {

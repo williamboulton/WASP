@@ -492,75 +492,91 @@ static MemoryData GetMemoryData() {
 /* =============================================================================
  * Disk: drive letter, total, free, read_speed, write_speed, timestamp
  * =============================================================================
- * PDH rate counters (Disk Read/Write Bytes/sec) need two samples with a time
- * interval between them; otherwise the rate is 0. We collect once, sleep 1s,
- * collect again, then read the value.
- * If _Total reports 0 for read (known on some systems), we sum per-disk instances.
+ * Use LogicalDisk(*) counters so each drive letter gets its own read/write rate.
+ * Rate counters require two samples separated by time.
  */
-static void GetDiskSpeeds(ULONGLONG& readBytesPerSec, ULONGLONG& writeBytesPerSec) {
+struct DiskSpeedEntry {
+    ULONGLONG read = 0;
+    ULONGLONG write = 0;
+};
+
+static std::string NormalizeDriveInstance(const char* instanceName) {
+    if (!instanceName) return "";
+    std::string instance(instanceName);
+    if (instance.size() >= 2 &&
+        std::isalpha((unsigned char)instance[0]) &&
+        instance[1] == ':') {
+        instance[0] = (char)std::toupper((unsigned char)instance[0]);
+        return instance.substr(0, 2);
+    }
+    return "";
+}
+
+static void MergeDiskCounterArray(
+    PDH_HCOUNTER counter,
+    bool isRead,
+    std::map<std::string, DiskSpeedEntry>& out
+) {
+    DWORD bufferSize = 0;
+    DWORD itemCount = 0;
+    PDH_STATUS status = PdhGetFormattedCounterArrayA(
+        counter,
+        PDH_FMT_DOUBLE,
+        &bufferSize,
+        &itemCount,
+        nullptr
+    );
+    if (status != PDH_MORE_DATA || bufferSize == 0 || itemCount == 0) {
+        return;
+    }
+
+    std::vector<unsigned char> raw(bufferSize);
+    auto* items = reinterpret_cast<PDH_FMT_COUNTERVALUE_ITEM_A*>(raw.data());
+    if (PdhGetFormattedCounterArrayA(counter, PDH_FMT_DOUBLE, &bufferSize, &itemCount, items) != ERROR_SUCCESS) {
+        return;
+    }
+
+    for (DWORD i = 0; i < itemCount; i++) {
+        if (items[i].FmtValue.CStatus != PDH_CSTATUS_VALID_DATA) continue;
+        const std::string drive = NormalizeDriveInstance(items[i].szName);
+        if (drive.empty() || drive == "_Total") continue;
+        double rawValue = items[i].FmtValue.doubleValue;
+        if (rawValue < 0.0) rawValue = 0.0;
+        ULONGLONG value = (ULONGLONG)rawValue;
+        if (isRead) out[drive].read = value;
+        else out[drive].write = value;
+    }
+}
+
+static std::map<std::string, DiskSpeedEntry> GetDiskSpeedsByDrive() {
     static PDH_HQUERY hQuery = nullptr;
-    static PDH_HCOUNTER hRead = nullptr, hWrite = nullptr;
+    static PDH_HCOUNTER hRead = nullptr;
+    static PDH_HCOUNTER hWrite = nullptr;
     static bool init = false;
-    readBytesPerSec = 0;
-    writeBytesPerSec = 0;
+    std::map<std::string, DiskSpeedEntry> result;
+
     if (!init) {
-        if (PdhOpenQueryA(nullptr, 0, &hQuery) != ERROR_SUCCESS) return;
-        /* Try _Total first (all disks); fallback to first physical disk (0) */
-        if (PdhAddEnglishCounterA(hQuery, "\\PhysicalDisk(_Total)\\Disk Read Bytes/sec", 0, &hRead) != ERROR_SUCCESS &&
-            PdhAddEnglishCounterA(hQuery, "\\PhysicalDisk(0)\\Disk Read Bytes/sec", 0, &hRead) != ERROR_SUCCESS) {
-            PdhCloseQuery(hQuery);
-            return;
+        if (PdhOpenQueryA(nullptr, 0, &hQuery) != ERROR_SUCCESS) {
+            return result;
         }
-        if (PdhAddEnglishCounterA(hQuery, "\\PhysicalDisk(_Total)\\Disk Write Bytes/sec", 0, &hWrite) != ERROR_SUCCESS &&
-            PdhAddEnglishCounterA(hQuery, "\\PhysicalDisk(0)\\Disk Write Bytes/sec", 0, &hWrite) != ERROR_SUCCESS) {
+        if (PdhAddEnglishCounterA(hQuery, "\\LogicalDisk(*)\\Disk Read Bytes/sec", 0, &hRead) != ERROR_SUCCESS ||
+            PdhAddEnglishCounterA(hQuery, "\\LogicalDisk(*)\\Disk Write Bytes/sec", 0, &hWrite) != ERROR_SUCCESS) {
             PdhCloseQuery(hQuery);
-            return;
+            hQuery = nullptr;
+            return result;
         }
         PdhCollectQueryData(hQuery);
         init = true;
     }
-    /* Rate counters need two samples with an interval; sleep 1s then collect again */
+
     Sleep(1000);
-    if (PdhCollectQueryData(hQuery) != ERROR_SUCCESS) return;
-    PDH_FMT_COUNTERVALUE val;
-    /* Read: some systems return rate as double; try both formats */
-    if (PdhGetFormattedCounterValue(hRead, PDH_FMT_DOUBLE, nullptr, &val) == ERROR_SUCCESS && val.CStatus == PDH_CSTATUS_VALID_DATA)
-        readBytesPerSec = (ULONGLONG)val.doubleValue;
-    if (readBytesPerSec == 0 && PdhGetFormattedCounterValue(hRead, PDH_FMT_LARGE, nullptr, &val) == ERROR_SUCCESS && val.CStatus == PDH_CSTATUS_VALID_DATA)
-        readBytesPerSec = val.largeValue;
-    /* Fallback: _Total often reports 0 for read on some Windows/drivers; sum instances 0..3 */
-    if (readBytesPerSec == 0) {
-        PDH_HQUERY hQ2 = nullptr;
-        PDH_HCOUNTER hCounters[4] = { nullptr };
-        int nAdded = 0;
-        if (PdhOpenQueryA(nullptr, 0, &hQ2) == ERROR_SUCCESS) {
-            for (int i = 0; i <= 3; i++) {
-                char path[128];
-                sprintf_s(path, "\\PhysicalDisk(%d)\\Disk Read Bytes/sec", i);
-                if (PdhAddEnglishCounterA(hQ2, path, 0, &hCounters[nAdded]) == ERROR_SUCCESS)
-                    nAdded++;
-            }
-            if (nAdded > 0) {
-                PdhCollectQueryData(hQ2);
-                Sleep(1000);
-                if (PdhCollectQueryData(hQ2) == ERROR_SUCCESS) {
-                    ULONGLONG sum = 0;
-                    for (int j = 0; j < nAdded; j++) {
-                        if (PdhGetFormattedCounterValue(hCounters[j], PDH_FMT_LARGE, nullptr, &val) == ERROR_SUCCESS && val.CStatus == PDH_CSTATUS_VALID_DATA)
-                            sum += val.largeValue;
-                        else if (PdhGetFormattedCounterValue(hCounters[j], PDH_FMT_DOUBLE, nullptr, &val) == ERROR_SUCCESS && val.CStatus == PDH_CSTATUS_VALID_DATA)
-                            sum += (ULONGLONG)val.doubleValue;
-                    }
-                    if (sum > 0) readBytesPerSec = sum;
-                }
-            }
-            PdhCloseQuery(hQ2);
-        }
+    if (PdhCollectQueryData(hQuery) != ERROR_SUCCESS) {
+        return result;
     }
-    if (PdhGetFormattedCounterValue(hWrite, PDH_FMT_DOUBLE, nullptr, &val) == ERROR_SUCCESS && val.CStatus == PDH_CSTATUS_VALID_DATA)
-        writeBytesPerSec = (ULONGLONG)val.doubleValue;
-    if (writeBytesPerSec == 0 && PdhGetFormattedCounterValue(hWrite, PDH_FMT_LARGE, nullptr, &val) == ERROR_SUCCESS && val.CStatus == PDH_CSTATUS_VALID_DATA)
-        writeBytesPerSec = val.largeValue;
+
+    MergeDiskCounterArray(hRead, true, result);
+    MergeDiskCounterArray(hWrite, false, result);
+    return result;
 }
 
 static std::vector<DiskEntry> GetDiskData() {
@@ -568,8 +584,7 @@ static std::vector<DiskEntry> GetDiskData() {
     std::string ts = GetTimestamp();
     char drives[256];
     if (GetLogicalDriveStringsA(sizeof(drives) - 1, drives) == 0) return list;
-    ULONGLONG readSpeed = 0, writeSpeed = 0;
-    GetDiskSpeeds(readSpeed, writeSpeed);
+    std::map<std::string, DiskSpeedEntry> speedsByDrive = GetDiskSpeedsByDrive();
     for (char* p = drives; *p; p += 4) {
         std::string root(p);
         if (root.size() >= 2) root.resize(2);
@@ -580,10 +595,16 @@ static std::vector<DiskEntry> GetDiskData() {
             continue;
         DiskEntry e;
         e.drive_letter = (root.size() >= 2 && root[1] == '\\') ? root.substr(0, 1) : root;
+        if (e.drive_letter.size() >= 2) {
+            e.drive_letter[0] = (char)std::toupper((unsigned char)e.drive_letter[0]);
+        }
         e.total_bytes = totalBytes.QuadPart;
         e.free_bytes = totalFree.QuadPart;
-        e.read_speed = readSpeed;
-        e.write_speed = writeSpeed;
+        const auto speedIt = speedsByDrive.find(e.drive_letter);
+        if (speedIt != speedsByDrive.end()) {
+            e.read_speed = speedIt->second.read;
+            e.write_speed = speedIt->second.write;
+        }
         e.timestamp = ts;
         list.push_back(e);
     }
