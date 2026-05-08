@@ -1,0 +1,12 @@
+# Generated packaging output
+dist/
+
+# Backend runtime output files
+wasp-backend/output/
+
+# Synced frontend artifacts copied during packaging
+wasp-backend/src/main/resources/static/
+
+# Local runtime artifacts
+output/
+system_metrics_output.json

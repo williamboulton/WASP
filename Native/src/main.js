@@ -5,7 +5,8 @@
  * manages view switching (Main / Memory / Disk / All Processes), theme toggle,
  * and sortable process tables.
  */
-const WS_URL = "ws://localhost:8080/ws/metrics";
+const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+const WS_URL = `${wsProtocol}://${window.location.host}/ws/metrics`;
 
 const connectionStatusEl = document.getElementById("connectionStatus");
 const statusIndicatorEl = document.querySelector(".status-indicator");
@@ -230,6 +231,24 @@ function connectWebSocket() {
     setConnectionStatus("Error – retrying…", "status-bad");
     socket.close();
   };
+}
+
+/**
+ * Downloads the backend history report CSV and saves it to the user's Downloads.
+ */
+async function downloadHistoryReport() {
+  try {
+    const link = document.createElement("a");
+    // Use direct navigation download instead of fetch/blob to avoid browser-specific
+    // issues where object URLs can be revoked before download starts.
+    link.href = "/api/history-reports";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (err) {
+    console.error("Failed to export history report", err);
+    window.alert("Could not export report. Make sure backend is running and try again.");
+  }
 }
 
 /**
@@ -705,6 +724,7 @@ document.querySelectorAll(".nav-item[data-view]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const view = btn.getAttribute("data-view");
     if (view === "export") {
+      downloadHistoryReport();
       return;
     }
     document.querySelectorAll(".nav-item[data-view]").forEach((b) => b.classList.remove("active"));

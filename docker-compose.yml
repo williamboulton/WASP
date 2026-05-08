@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.dockerfile
+    ports:
+      - "8080:8080"
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx.dockerfile
+    ports:
+      - "8000:80"
+  python-client:
+    depends_on:
+      - backend
+    build:
+      context: .
+      dockerfile: docker/send_client.dockerfile
+    environment:
+      - WASP_WS_URI=ws://backend:8080/ws/metrics
+      - WASP_METRICS_JSON=/app/metrics/system_metrics_output.json
+    volumes:
+      - ./Native/metrics:/app/metrics
