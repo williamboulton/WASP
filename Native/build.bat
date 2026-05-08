@@ -293,6 +293,11 @@ echo Compiling system_metrics.cpp...
 cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.exe src\system_metrics.cpp /link psapi.lib advapi32.lib ntdll.lib pdh.lib powrprof.lib
 if errorlevel 1 goto :build_failed
 
+echo.
+echo Compiling wasp_tray.cpp...
+cl /EHsc /W4 /std:c++17 /Fe:build\WASPTray.exe src\wasp_tray.cpp /link shell32.lib user32.lib
+if errorlevel 1 goto :build_failed
+
 
 REM =============================================================================
 REM STEP 6: Check Compilation Result
@@ -323,6 +328,7 @@ echo ========================================
 echo Build successful!
 echo Output: build\sysinfo.exe
 echo Output: build\system_metrics.exe
+echo Output: build\WASPTray.exe
 echo ========================================
 echo.
 

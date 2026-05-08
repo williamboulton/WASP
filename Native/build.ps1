@@ -31,6 +31,13 @@
 # =============================================================================
 
 
+# Optional switches for automation flows (e.g., packaging scripts).
+param(
+    [switch]$NoPrompt,
+    [switch]$RunAfterBuild
+)
+
+
 # =============================================================================
 # SECTION 1: Find Visual Studio Installation
 # =============================================================================
@@ -260,6 +267,10 @@ $compileMetricsCmd = @"
 call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.exe src\system_metrics.cpp /link psapi.lib advapi32.lib ntdll.lib pdh.lib powrprof.lib
 "@
 
+$compileTrayCmd = @"
+call "$vcvarsall" >nul 2>&1 && cl /EHsc /W4 /std:c++17 /Fe:build\WASPTray.exe src\wasp_tray.cpp /link shell32.lib user32.lib
+"@
+
 
 # =============================================================================
 # SECTION 6: Execute the Compilation
@@ -294,6 +305,9 @@ $mainExit = $LASTEXITCODE
 cmd /c $compileMetricsCmd
 $metricsExit = $LASTEXITCODE
 
+cmd /c $compileTrayCmd
+$trayExit = $LASTEXITCODE
+
 
 # =============================================================================
 # SECTION 7: Check Result and Provide Feedback
@@ -314,7 +328,7 @@ $metricsExit = $LASTEXITCODE
 # Note: PowerShell uses -eq instead of == because < and > are reserved for
 # redirection operators.
 # -----------------------------------------------------------------------------
-if ($mainExit -eq 0 -and $metricsExit -eq 0) {
+if ($mainExit -eq 0 -and $metricsExit -eq 0 -and $trayExit -eq 0) {
     
     # -------------------------------------------------------------------------
     # Success: Display success message
@@ -323,6 +337,7 @@ if ($mainExit -eq 0 -and $metricsExit -eq 0) {
     Write-Host "Build successful!" -ForegroundColor Green
     Write-Host "Output: build\sysinfo.exe" -ForegroundColor Green
     Write-Host "Output: build\system_metrics.exe" -ForegroundColor Green
+    Write-Host "Output: build\WASPTray.exe" -ForegroundColor Green
     Write-Host "========================================`n" -ForegroundColor Green
     
     # -------------------------------------------------------------------------
@@ -333,27 +348,32 @@ if ($mainExit -eq 0 -and $metricsExit -eq 0) {
     #
     # This is a convenience feature - the user can immediately test the build.
     # -------------------------------------------------------------------------
-    $run = Read-Host "Run the program now? (y/n)"
-    
-    # -------------------------------------------------------------------------
-    # Conditional: Check if user wants to run
-    # -------------------------------------------------------------------------
-    # -or is the logical OR operator.
-    # We check for both lowercase 'y' and uppercase 'Y' for user convenience.
-    # -------------------------------------------------------------------------
-    if ($run -eq 'y' -or $run -eq 'Y') {
-        
-        # ---------------------------------------------------------------------
-        # Run the compiled executable
-        # ---------------------------------------------------------------------
-        # & is the call operator - it executes the command.
-        # .\ means "current directory" (similar to ./ on Linux)
-        #
-        # We need & because the path is a string. Without it, PowerShell
-        # would try to interpret .\build\sysinfo.exe as a string to output.
-        # ---------------------------------------------------------------------
+    if ($RunAfterBuild) {
         Write-Host "`nRunning sysinfo.exe...`n" -ForegroundColor Cyan
         & .\build\sysinfo.exe
+    } elseif (-not $NoPrompt) {
+        $run = Read-Host "Run the program now? (y/n)"
+        
+        # ---------------------------------------------------------------------
+        # Conditional: Check if user wants to run
+        # ---------------------------------------------------------------------
+        # -or is the logical OR operator.
+        # We check for both lowercase 'y' and uppercase 'Y' for user convenience.
+        # ---------------------------------------------------------------------
+        if ($run -eq 'y' -or $run -eq 'Y') {
+            
+            # -----------------------------------------------------------------
+            # Run the compiled executable
+            # -----------------------------------------------------------------
+            # & is the call operator - it executes the command.
+            # .\ means "current directory" (similar to ./ on Linux)
+            #
+            # We need & because the path is a string. Without it, PowerShell
+            # would try to interpret .\build\sysinfo.exe as a string to output.
+            # -----------------------------------------------------------------
+            Write-Host "`nRunning sysinfo.exe...`n" -ForegroundColor Cyan
+            & .\build\sysinfo.exe
+        }
     }
     
 } else {
@@ -364,6 +384,7 @@ if ($mainExit -eq 0 -and $metricsExit -eq 0) {
     Write-Host "`nBuild failed!" -ForegroundColor Red
     if ($mainExit -ne 0) { Write-Host "  sysinfo.exe failed to compile." -ForegroundColor Red }
     if ($metricsExit -ne 0) { Write-Host "  system_metrics.exe failed to compile." -ForegroundColor Red }
+    if ($trayExit -ne 0) { Write-Host "  WASPTray.exe failed to compile." -ForegroundColor Red }
     exit 1
 }
 
