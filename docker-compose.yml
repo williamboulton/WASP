@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.dockerfile
+    ports:
+      - "8080:8080"
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx.dockerfile
+    ports:
+      - "8000:80"
+  python-client:
+    depends_on:
+      - backend
+    build:
+      context: .
+      dockerfile: docker/send_client.dockerfile
+    volumes:
+      - ./Native/metrics/system_metrics_output.json:/app/system_metrics_output.json
