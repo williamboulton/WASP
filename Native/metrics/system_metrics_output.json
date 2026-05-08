@@ -1,0 +1,2752 @@
+{
+  "cpu": {
+    "cpu_mhz": 4700,
+    "cpu_usage_percent": 1.49,
+    "system_responsiveness_percent": 99.90,
+    "timestamp": "2026-02-26 02:39:30.960"
+  },
+  "cpu_cores": [
+    {
+      "core_index": 0,
+      "core_mhz": 4700,
+      "core_usage_percent": 2.03,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 1,
+      "core_mhz": 4700,
+      "core_usage_percent": 2.03,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 2,
+      "core_mhz": 4700,
+      "core_usage_percent": 5.08,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 3,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.00,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 4,
+      "core_mhz": 4700,
+      "core_usage_percent": 1.02,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 5,
+      "core_mhz": 4700,
+      "core_usage_percent": 1.02,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 6,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.51,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 7,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.51,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 8,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.51,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 9,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.51,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 10,
+      "core_mhz": 4700,
+      "core_usage_percent": 5.08,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 11,
+      "core_mhz": 4700,
+      "core_usage_percent": 3.55,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 12,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.00,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 13,
+      "core_mhz": 4700,
+      "core_usage_percent": 1.03,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 14,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.51,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "core_index": 15,
+      "core_mhz": 4700,
+      "core_usage_percent": 0.51,
+      "timestamp": "2026-02-26 02:39:30.960"
+    }
+  ],
+  "memory": {
+    "total_bytes": 33346146304,
+    "free_bytes": 18831712256,
+    "used_bytes": 14514434048,
+    "memory_usage_percent": 43,
+    "page_fault_count": 7562,
+    "timestamp": "2026-02-26 02:39:30.960"
+  },
+  "disk": [
+    {
+      "drive_letter": "C:",
+      "total_bytes": 1999392206848,
+      "free_bytes": 1012803956736,
+      "read_speed_bytes_per_sec": 5331,
+      "write_speed_bytes_per_sec": 45314,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "drive_letter": "D:",
+      "total_bytes": 1000196800512,
+      "free_bytes": 452141776896,
+      "read_speed_bytes_per_sec": 5331,
+      "write_speed_bytes_per_sec": 45314,
+      "timestamp": "2026-02-26 02:39:30.960"
+    },
+    {
+      "drive_letter": "E:",
+      "total_bytes": 5000924233728,
+      "free_bytes": 2283607687168,
+      "read_speed_bytes_per_sec": 5331,
+      "write_speed_bytes_per_sec": 45314,
+      "timestamp": "2026-02-26 02:39:30.960"
+    }
+  ],
+  "processes": [
+    {
+      "pid": 0,
+      "name": "[System Process]",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4,
+      "name": "System",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 236,
+      "name": "Secure System",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 280,
+      "name": "Registry",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 788,
+      "name": "smss.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1220,
+      "name": "csrss.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1400,
+      "name": "wininit.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1408,
+      "name": "csrss.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1480,
+      "name": "services.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1508,
+      "name": "winlogon.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "HIGH",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2187500,
+      "location": "C:\\Windows\\System32\\winlogon.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1540,
+      "name": "LsaIso.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2500000,
+      "location": "C:\\Windows\\System32\\LsaIso.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1548,
+      "name": "lsass.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1704,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 488437500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1744,
+      "name": "fontdrvhost.exe",
+      "owner": "Font Driver Host\\UMFD-0",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "C:\\Windows\\System32\\fontdrvhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1748,
+      "name": "fontdrvhost.exe",
+      "owner": "Font Driver Host\\UMFD-1",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2656250,
+      "location": "C:\\Windows\\System32\\fontdrvhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1832,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\NETWORK SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 272812500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1908,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 40156250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2004,
+      "name": "dwm.exe",
+      "owner": "Window Manager\\DWM-1",
+      "priority": "HIGH",
+      "cpu_percent": 0.09,
+      "cpu_time_100ns": 29305625000,
+      "location": "C:\\Windows\\System32\\dwm.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1600,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1564,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2160,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 16250000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2200,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2500000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2208,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1406250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2216,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2500000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2252,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2187500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2364,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 13750000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2376,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2452,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4218750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2600,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\NETWORK SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 51406250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2688,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2756,
+      "name": "WUDFHost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\WUDFHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2892,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\NETWORK SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 93750000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2920,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2560,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 13750000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3124,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 81406250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3192,
+      "name": "NVDisplay.Container.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 771093750,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\nv_dispi.inf_amd64_7840b4313191ae17\\Display.NvContainer\\NVDisplay.Container.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3224,
+      "name": "amdfendrsr.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1250000,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdfendr.inf_amd64_9089120be4c72627\\amdfendrsr.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3232,
+      "name": "atiesrxx.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\u0420529.inf_amd64_94ad5a6c4d1a04e2\\B419765\\atiesrxx.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3240,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 63281250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3356,
+      "name": "atieclxx.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1710937500,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\u0420529.inf_amd64_94ad5a6c4d1a04e2\\B419765\\atieclxx.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3392,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1250000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3400,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 67968750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3408,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1093750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3504,
+      "name": "Memory Compression",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3556,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1406250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3592,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4062500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3600,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 12187500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3676,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 67656250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3708,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3864,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4375000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4004,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 112500000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4124,
+      "name": "NVDisplay.Container.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1311406250,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\nv_dispi.inf_amd64_7840b4313191ae17\\Display.NvContainer\\NVDisplay.Container.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4192,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1562500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4200,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1875000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4208,
+      "name": "vpnagent.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2812500,
+      "location": "C:\\Program Files (x86)\\Cisco\\Cisco Secure Client\\vpnagent.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4552,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 130312500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4728,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 26093750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4788,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1250000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3076,
+      "name": "spoolsv.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1406250,
+      "location": "C:\\Windows\\System32\\spoolsv.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5136,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 13125000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5208,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1718750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5484,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\NETWORK SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1562500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5604,
+      "name": "AmdPpkgSvc.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\amdppkg.inf_amd64_2e5ec3779d1804d1\\AmdPpkgSvc.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5612,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\NETWORK SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 13125000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5620,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 110937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5644,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1406250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5656,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5664,
+      "name": "srvstub.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "C:\\Program Files\\Process Lasso\\srvstub.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5672,
+      "name": "logi_lamparray_service.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 155781250,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\logi_lamparray_usb.inf_amd64_e7cd8faef8863187\\logi_lamparray_service.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5680,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2812500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5688,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5696,
+      "name": "RtkAudUService64.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5000000,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\realtekservice.inf_amd64_7e93164ae8ff6bf7\\RtkAudUService64.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5704,
+      "name": "MpDefenderCoreService.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5724,
+      "name": "lghub_updater.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 10156250,
+      "location": "C:\\Program Files\\LGHUB\\lghub_updater.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5764,
+      "name": "MsMpEng.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5968,
+      "name": "ProcessGovernor.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "HIGH",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1319531250,
+      "location": "C:\\Program Files\\Process Lasso\\ProcessGovernor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6808,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 307656250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6788,
+      "name": "gamingservices.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 115312500,
+      "location": "C:\\Program Files\\WindowsApps\\Microsoft.GamingServices_33.108.12001.0_x64__8wekyb3d8bbwe\\gamingservices.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6520,
+      "name": "gamingservicesnet.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Program Files\\WindowsApps\\Microsoft.GamingServices_33.108.12001.0_x64__8wekyb3d8bbwe\\gamingservicesnet.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7624,
+      "name": "sihost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 89531250,
+      "location": "C:\\Windows\\System32\\sihost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7676,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 9687500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7772,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1250000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7816,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 15937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7916,
+      "name": "taskhostw.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5468750,
+      "location": "C:\\Windows\\System32\\taskhostw.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7932,
+      "name": "bitsumsessionagent.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 15156250,
+      "location": "C:\\Program Files\\Process Lasso\\bitsumsessionagent.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7984,
+      "name": "ProcessLasso.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.09,
+      "cpu_time_100ns": 2624062500,
+      "location": "C:\\Program Files\\Process Lasso\\ProcessLasso.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8004,
+      "name": "MicrosoftEdgeUpdate.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1562500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8064,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 55000000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1536,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5312500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8136,
+      "name": "explorer.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2070000000,
+      "location": "C:\\Windows\\explorer.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8320,
+      "name": "ShellHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3906250,
+      "location": "C:\\Windows\\System32\\ShellHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8628,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5312500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8736,
+      "name": "CrossDeviceResume.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5156250,
+      "location": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\CrossDeviceResume.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9140,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9148,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 7812500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7836,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8748,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1562500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8824,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9320,
+      "name": "NgcIso.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "HIGH",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3125000,
+      "location": "C:\\Windows\\System32\\NgcIso.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9696,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3593750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9740,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2812500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9848,
+      "name": "SearchHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 92031250,
+      "location": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\SearchHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9860,
+      "name": "StartMenuExperienceHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 61093750,
+      "location": "C:\\Windows\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10076,
+      "name": "Widgets.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 39375000,
+      "location": "C:\\Program Files\\WindowsApps\\MicrosoftWindows.Client.WebExperience_526.1202.40.0_x64__cw5n1h2txyewy\\Dashboard\\Widgets.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7120,
+      "name": "UserOOBEBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\oobe\\UserOOBEBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10304,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 50312500,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10324,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5156250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10344,
+      "name": "WidgetService.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5000000,
+      "location": "C:\\Program Files\\WindowsApps\\Microsoft.WidgetsPlatformRuntime_1.6.14.0_x64__8wekyb3d8bbwe\\WidgetService\\WidgetService.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10624,
+      "name": "SearchIndexer.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 277031250,
+      "location": "C:\\Windows\\System32\\SearchIndexer.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10952,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 62031250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11048,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8056,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 28281250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11156,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 18125000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11396,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2343750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11868,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "IDLE",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 66406250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12300,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 18593750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12684,
+      "name": "ctfmon.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "HIGH",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 379218750,
+      "location": "C:\\Windows\\System32\\ctfmon.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12980,
+      "name": "LockApp.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 8437500,
+      "location": "C:\\Windows\\SystemApps\\Microsoft.LockApp_cw5n1h2txyewy\\LockApp.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13212,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 17968750,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12588,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 10937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6844,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 15000000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13064,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1406250,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10296,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13652,
+      "name": "NisSrv.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 14276,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2812500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 15224,
+      "name": "SecurityHealthSystray.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1093750,
+      "location": "C:\\Windows\\System32\\SecurityHealthSystray.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 15244,
+      "name": "SecurityHealthService.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 14636,
+      "name": "RtkAudUService64.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 8906250,
+      "location": "C:\\Windows\\System32\\DriverStore\\FileRepository\\realtekservice.inf_amd64_7e93164ae8ff6bf7\\RtkAudUService64.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13284,
+      "name": "vgtray.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 91093750,
+      "location": "C:\\Program Files\\Riot Vanguard\\vgtray.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9724,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 22812500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5876,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3281250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6428,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 34375000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 14444,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1804,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 83125000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2052,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 10468750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2412,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1406250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4216,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "IDLE",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 135937500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11884,
+      "name": "msedgewebview2.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\145.0.3800.70\\msedgewebview2.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8104,
+      "name": "backgroundTaskHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\backgroundTaskHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8204,
+      "name": "backgroundTaskHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\backgroundTaskHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9004,
+      "name": "AdobeNotificationClient.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1875000,
+      "location": "C:\\Program Files\\WindowsApps\\AdobeNotificationClient_6.0.0.1_x86__enpm4xejd91yc\\AdobeNotificationClient.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13192,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1562500,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11608,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5124,
+      "name": "svchost.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2564,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4364,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4062500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 14592,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 36875000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7472,
+      "name": "svchost.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11160,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17380,
+      "name": "ApplicationFrameHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 37031250,
+      "location": "C:\\Windows\\System32\\ApplicationFrameHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17500,
+      "name": "SystemSettings.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 22187500,
+      "location": "C:\\Windows\\ImmersiveControlPanel\\SystemSettings.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12388,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18924,
+      "name": "svchost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18420,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8492,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9060,
+      "name": "steam.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1522187500,
+      "location": "C:\\Program Files (x86)\\Steam\\steam.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5628,
+      "name": "Discord.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3244843750,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Discord\\app-1.0.9225\\Discord.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18904,
+      "name": "Discord.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Discord\\app-1.0.9225\\Discord.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 8756,
+      "name": "Discord.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3696718750,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Discord\\app-1.0.9225\\Discord.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 16076,
+      "name": "Discord.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 248750000,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Discord\\app-1.0.9225\\Discord.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5272,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3049218750,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6812,
+      "name": "steamservice.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 31093750,
+      "location": "C:\\Program Files (x86)\\Common Files\\Steam\\steamservice.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 15416,
+      "name": "Discord.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.09,
+      "cpu_time_100ns": 25758906250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Discord\\app-1.0.9225\\Discord.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 16204,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10912,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 422187500,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4492,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 61718750,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18348,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 13125000,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12140,
+      "name": "Discord.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 19375000,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Discord\\app-1.0.9225\\Discord.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 12320,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1403281250,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24396,
+      "name": "backgroundTaskHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5625000,
+      "location": "C:\\Windows\\System32\\backgroundTaskHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 22320,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4062500,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10016,
+      "name": "TextInputHost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "HIGH",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 167812500,
+      "location": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\TextInputHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 808,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23472,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 6718750,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24580,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18536,
+      "name": "WUDFHost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Windows\\System32\\WUDFHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 20836,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5352,
+      "name": "svchost.exe",
+      "owner": "",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 19988,
+      "name": "steamwebhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "IDLE",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5312500,
+      "location": "C:\\Program Files (x86)\\Steam\\bin\\cef\\cef.win64\\steamwebhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4448,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2289687500,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21944,
+      "name": "crashhelper.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "C:\\Program Files\\Mozilla Firefox\\crashhelper.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10120,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5318281250,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 25304,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5376,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 9531250,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17240,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1060625000,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 244,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 376718750,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 19000,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 102500000,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13576,
+      "name": "MbamBgNativeMsg.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2812500,
+      "location": "C:\\Program Files\\Malwarebytes\\Anti-Malware\\MbamBgNativeMsg.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18560,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1875000,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 19284,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10452,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 19876,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17896,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18160,
+      "name": "firefox.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17148,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1016718750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18784,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 15196,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4057968750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23328,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 227031250,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23496,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2500000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9788,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 21718750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24632,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 295468750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5572,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 40625000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 22744,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4062500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23304,
+      "name": "cmd.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Windows\\System32\\cmd.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 22668,
+      "name": "conhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\conhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24668,
+      "name": "MbamBgNativeMsg.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1875000,
+      "location": "C:\\Program Files\\Malwarebytes\\Anti-Malware\\MbamBgNativeMsg.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21460,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 29218750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 20232,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1562500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11540,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5000000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21772,
+      "name": "RuntimeBroker.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4375000,
+      "location": "C:\\Windows\\System32\\RuntimeBroker.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18504,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.09,
+      "cpu_time_100ns": 1043437500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23136,
+      "name": "Video.UI.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1875000,
+      "location": "C:\\Program Files\\WindowsApps\\Microsoft.ZuneVideo_10.25121.10051.0_x64__8wekyb3d8bbwe\\Video.UI.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 16012,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 376562500,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6672,
+      "name": "Agent.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 70156250,
+      "location": "C:\\ProgramData\\Battle.net\\Agent\\Agent.9390\\Agent.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23116,
+      "name": "conhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\conhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23012,
+      "name": "WmiPrvSE.exe",
+      "owner": "NT AUTHORITY\\NETWORK SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 84375000,
+      "location": "C:\\Windows\\System32\\wbem\\WmiPrvSE.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 3272,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 79375000,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 16108,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 19968,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 6250000,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 10784,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 68750000,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17392,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "IDLE",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 91562500,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24848,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3556093750,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4644,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 158750000,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7036,
+      "name": "WmiPrvSE.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\wbem\\WmiPrvSE.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 5296,
+      "name": "smartscreen.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\smartscreen.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4548,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7596,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 180625000,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 22408,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23160,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "ABOVE_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 978125000,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 20576,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 17031250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23800,
+      "name": "msedge.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "BELOW_NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 9944,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.09,
+      "cpu_time_100ns": 1772656250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 2516,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 8906250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 416,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 145156250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 18584,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 34218750,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 20292,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4062500,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24736,
+      "name": "conhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\conhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 6680,
+      "name": "powershell.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5937500,
+      "location": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 4688,
+      "name": "conhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Windows\\System32\\conhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24896,
+      "name": "powershell.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 3750000,
+      "location": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 7028,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 5468750,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 13736,
+      "name": "Cursor.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 468750,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23700,
+      "name": "CodeSetup-stable-2.5.25.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 781250,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Temp\\vscode-stable-user-x64-a6k2hu3d2vj\\CodeSetup-stable-2.5.25.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17476,
+      "name": "CodeSetup-stable-2.5.25.tmp",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 231093750,
+      "location": "C:\\Users\\matty\\AppData\\Local\\Temp\\is-T1UA8.tmp\\CodeSetup-stable-2.5.25.tmp",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21408,
+      "name": "SearchProtocolHost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1250000,
+      "location": "C:\\Windows\\System32\\SearchProtocolHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 15748,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 12187500,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 14840,
+      "name": "Battle.net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "IDLE",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2656250,
+      "location": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 19024,
+      "name": "audiodg.exe",
+      "owner": "NT AUTHORITY\\LOCAL SERVICE",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2968750,
+      "location": "C:\\Windows\\System32\\audiodg.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21920,
+      "name": "SearchFilterHost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\SearchFilterHost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21256,
+      "name": "cmd.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4062500,
+      "location": "C:\\Windows\\System32\\cmd.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 14284,
+      "name": "conhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 312500,
+      "location": "C:\\Windows\\System32\\conhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 21556,
+      "name": "OpenConsole.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 937500,
+      "location": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.23.20211.0_x64__8wekyb3d8bbwe\\OpenConsole.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 1428,
+      "name": "WindowsTerminal.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 7500000,
+      "location": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.23.20211.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24688,
+      "name": "vctip.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 4218750,
+      "location": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.50.35717\\bin\\Hostx64\\x64\\vctip.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 11104,
+      "name": "dllhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 625000,
+      "location": "C:\\Windows\\System32\\dllhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 16708,
+      "name": "cmd.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "C:\\Windows\\System32\\cmd.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24788,
+      "name": "conhost.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 2656250,
+      "location": "C:\\Windows\\System32\\conhost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 23404,
+      "name": "system_metrics.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.09,
+      "cpu_time_100ns": 9062500,
+      "location": "C:\\Users\\matty\\Desktop\\All\\Online\\College Sem10\\Capping\\Research\\build\\system_metrics.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24592,
+      "name": "svchost.exe",
+      "owner": "NT AUTHORITY\\SYSTEM",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 1875000,
+      "location": "C:\\Windows\\System32\\svchost.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 17232,
+      "name": "net.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 156250,
+      "location": "C:\\Windows\\System32\\net.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    },
+    {
+      "pid": 24036,
+      "name": "net1.exe",
+      "owner": "MattyOW\\matty",
+      "priority": "NORMAL",
+      "cpu_percent": 0.00,
+      "cpu_time_100ns": 0,
+      "location": "C:\\Windows\\System32\\net1.exe",
+      "timestamp": "2026-02-26 02:39:33.019"
+    }
+  ]
+}
