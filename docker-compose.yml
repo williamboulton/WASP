@@ -17,5 +17,8 @@ services:
     build:
       context: .
       dockerfile: docker/send_client.dockerfile
+    environment:
+      - WASP_WS_URI=ws://backend:8080/ws/metrics
+      - WASP_METRICS_JSON=/app/metrics/system_metrics_output.json
     volumes:
-      - ./Native/metrics/system_metrics_output.json:/app/system_metrics_output.json
+      - ./Native/metrics:/app/metrics

@@ -46,6 +46,7 @@
 #include <chrono>
 #include <sstream>
 #include <map>
+#include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -71,6 +72,9 @@ typedef struct _PROCESSOR_POWER_INFORMATION {
 
 #ifndef PDH_CSTATUS_VALID_DATA
 #define PDH_CSTATUS_VALID_DATA 0
+#endif
+#ifndef PDH_MORE_DATA
+#define PDH_MORE_DATA ((PDH_STATUS)0x800007D2L)
 #endif
 
 /* Service name and poll interval (ms). ~2s between outputs (1s disk + 1s process sampling). */
@@ -135,36 +139,35 @@ typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
 #define SystemProcessorPerformanceInformation 8
 
 /* -----------------------------------------------------------------------------
- * Timestamp as string (ISO-like) for primary key use
+ * Timestamp as epoch milliseconds string for timezone-safe keying
  * ----------------------------------------------------------------------------- */
 static std::string GetTimestamp() {
     auto now = std::chrono::system_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(now);
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-        now.time_since_epoch()) % 1000;
-    std::tm tm_buf;
-    localtime_s(&tm_buf, &time);
-    std::ostringstream oss;
-    oss << std::put_time(&tm_buf, "%Y-%m-%d %H:%M:%S");
-    oss << '.' << std::setfill('0') << std::setw(3) << ms.count();
-    return oss.str();
+    auto epochMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        now.time_since_epoch()).count();
+    return std::to_string(epochMs);
 }
 
 /* =============================================================================
  * CPU: MHz, current usage, timestamp
  * ============================================================================= */
 static ULONGLONG s_prevIdle = 0, s_prevKernel = 0, s_prevUser = 0, s_prevTotal = 0;
+static std::vector<DWORD> GetPerCoreCurrentMhz();  /* forward declaration */
 
 static bool GetCpuMhz(DWORD& outMhz) {
-    HKEY hKey;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE,
-            "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
-            0, KEY_READ, &hKey) != ERROR_SUCCESS)
+    std::vector<DWORD> perCoreMhz = GetPerCoreCurrentMhz();
+    ULONGLONG totalMhz = 0;
+    DWORD samples = 0;
+    for (DWORD mhz : perCoreMhz) {
+        if (mhz > 0) {
+            totalMhz += mhz;
+            samples++;
+        }
+    }
+    if (samples == 0)
         return false;
-    DWORD type, size = sizeof(DWORD);
-    LONG r = RegQueryValueExA(hKey, "~MHz", nullptr, &type, (LPBYTE)&outMhz, &size);
-    RegCloseKey(hKey);
-    return (r == ERROR_SUCCESS && type == REG_DWORD);
+    outMhz = (DWORD)(totalMhz / samples);
+    return true;
 }
 
 static double GetCpuUsagePercent() {
@@ -283,14 +286,106 @@ static std::vector<DWORD> GetPerCoreCurrentMhz() {
     SYSTEM_INFO si;
     GetSystemInfo(&si);
     std::vector<DWORD> mhz(si.dwNumberOfProcessors, 0);
+    if (si.dwNumberOfProcessors == 0)
+        return mhz;
+
     std::vector<PROCESSOR_POWER_INFORMATION> buf(si.dwNumberOfProcessors);
     ULONG bufLen = (ULONG)(buf.size() * sizeof(PROCESSOR_POWER_INFORMATION));
-    /* ProcessorInformation = 11 (per-processor current MHz at sample time) */
-    if (CallNtPowerInformation((POWER_INFORMATION_LEVEL)11, nullptr, 0, buf.data(), bufLen) == 0) {
-        for (size_t i = 0; i < buf.size() && i < mhz.size(); i++)
-            mhz[i] = buf[i].CurrentMhz;
-        return mhz;
+    bool havePowerInfo = (CallNtPowerInformation((POWER_INFORMATION_LEVEL)11, nullptr, 0, buf.data(), bufLen) == 0);
+
+    /* Start with NtPowerInformation values as baseline. */
+    if (havePowerInfo) {
+        for (size_t i = 0; i < buf.size() && i < mhz.size(); i++) {
+            if (buf[i].CurrentMhz > 0)
+                mhz[i] = buf[i].CurrentMhz;
+        }
     }
+
+    /*
+     * Some systems report fixed CurrentMhz but do expose dynamic "% of Maximum Frequency".
+     * If available, derive current MHz per logical core from MaxMhz * percent/100.
+     */
+    PDH_HQUERY hQuery = nullptr;
+    PDH_HCOUNTER hPct = nullptr;
+    if (PdhOpenQueryA(nullptr, 0, &hQuery) == ERROR_SUCCESS) {
+        if (PdhAddEnglishCounterA(hQuery, "\\Processor Information(*)\\% of Maximum Frequency", 0, &hPct) == ERROR_SUCCESS &&
+            PdhCollectQueryData(hQuery) == ERROR_SUCCESS) {
+            DWORD bufferSize = 0, itemCount = 0;
+            PDH_STATUS status = PdhGetFormattedCounterArrayA(hPct, PDH_FMT_DOUBLE, &bufferSize, &itemCount, nullptr);
+            if (status == PDH_MORE_DATA && bufferSize > 0 && itemCount > 0) {
+                std::vector<unsigned char> raw(bufferSize);
+                auto* items = reinterpret_cast<PDH_FMT_COUNTERVALUE_ITEM_A*>(raw.data());
+                if (PdhGetFormattedCounterArrayA(hPct, PDH_FMT_DOUBLE, &bufferSize, &itemCount, items) == ERROR_SUCCESS) {
+                    for (DWORD i = 0; i < itemCount; i++) {
+                        if (items[i].FmtValue.CStatus != PDH_CSTATUS_VALID_DATA)
+                            continue;
+                        const char* name = items[i].szName;
+                        if (!name || !name[0])
+                            continue;
+                        if (strcmp(name, "_Total") == 0)
+                            continue;
+
+                        const char* comma = strrchr(name, ',');
+                        if (!comma || !comma[1])
+                            continue;
+                        if (strcmp(comma + 1, "_Total") == 0)
+                            continue;
+
+                        bool indexNumeric = true;
+                        for (const char* p = comma + 1; *p; p++) {
+                            if (!std::isdigit((unsigned char)*p)) {
+                                indexNumeric = false;
+                                break;
+                            }
+                        }
+                        if (!indexNumeric)
+                            continue;
+
+                        int group = 0;
+                        int indexInGroup = atoi(comma + 1);
+                        if (comma > name) {
+                            std::string groupText(name, comma - name);
+                            bool groupNumeric = !groupText.empty();
+                            for (char c : groupText) {
+                                if (!std::isdigit((unsigned char)c)) {
+                                    groupNumeric = false;
+                                    break;
+                                }
+                            }
+                            if (groupNumeric)
+                                group = atoi(groupText.c_str());
+                        }
+
+                        int logicalIndex = group * 64 + indexInGroup;
+                        if (logicalIndex < 0 || logicalIndex >= (int)mhz.size())
+                            continue;
+
+                        double pct = items[i].FmtValue.doubleValue;
+                        if (pct < 0.0) pct = 0.0;
+                        if (pct > 100.0) pct = 100.0;
+
+                        DWORD baseMhz = 0;
+                        if (havePowerInfo && logicalIndex < (int)buf.size() && buf[logicalIndex].MaxMhz > 0)
+                            baseMhz = buf[logicalIndex].MaxMhz;
+                        else if (mhz[logicalIndex] > 0)
+                            baseMhz = mhz[logicalIndex];
+
+                        if (baseMhz > 0)
+                            mhz[logicalIndex] = (DWORD)((baseMhz * pct) / 100.0 + 0.5);
+                    }
+                }
+            }
+        }
+        PdhCloseQuery(hQuery);
+    }
+
+    bool any = false;
+    for (DWORD v : mhz) {
+        if (v > 0) { any = true; break; }
+    }
+    if (any)
+        return mhz;
+
     /* Fallback: registry ~MHz (nominal/max) per core */
     for (DWORD i = 0; i < si.dwNumberOfProcessors; i++) {
         std::string path = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\" + std::to_string(i);
@@ -759,6 +854,28 @@ static void ReportSvcStatus(DWORD state, DWORD win32Exit = NO_ERROR, DWORD waitH
     SetServiceStatus(g_svcStatusHandle, &g_svcStatus);
 }
 
+static bool CollectAndWriteMetricsSnapshot(const std::string& outPath) {
+    CpuData cpu = GetCpuData();
+    auto cores = GetCpuCoresData();
+    MemoryData mem = GetMemoryData();
+    auto disks = GetDiskData();
+    GetProcessMetrics();
+    Sleep(1000);
+    auto processes = GetProcessMetrics();
+    std::string procTs = GetTimestamp();
+    std::string jsonPretty = FormatMetricsJsonPretty(cpu, cores, mem, disks, processes, procTs);
+    return WriteMetricsJsonToFile(outPath, jsonPretty);
+}
+
+static void RunMetricsWriteLoop(const std::string& outPath, volatile LONG* stopFlag) {
+    PrimeCpuReadings();
+    Sleep(500);
+    while (InterlockedCompareExchange(stopFlag, 0, 0) == 0) {
+        CollectAndWriteMetricsSnapshot(outPath);
+        Sleep(METRICS_POLL_MS);
+    }
+}
+
 static VOID WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
     (void)argc;
     (void)argv;
@@ -767,24 +884,10 @@ static VOID WINAPI ServiceMain(DWORD argc, LPSTR* argv) {
     g_svcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
     g_svcStatus.dwServiceSpecificExitCode = 0;
     ReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 3000);
-    PrimeCpuReadings();
-    Sleep(500);
     ReportSvcStatus(SERVICE_RUNNING);
 
     std::string outPath = GetExeDirectory() + "system_metrics_output.json";
-    while (InterlockedCompareExchange(&g_svcStopRequested, 0, 0) == 0) {
-        CpuData cpu = GetCpuData();
-        auto cores = GetCpuCoresData();
-        MemoryData mem = GetMemoryData();
-        auto disks = GetDiskData();
-        GetProcessMetrics();
-        Sleep(1000);
-        auto processes = GetProcessMetrics();
-        std::string procTs = GetTimestamp();
-        std::string jsonPretty = FormatMetricsJsonPretty(cpu, cores, mem, disks, processes, procTs);
-        WriteMetricsJsonToFile(outPath, jsonPretty);
-        Sleep(METRICS_POLL_MS);
-    }
+    RunMetricsWriteLoop(outPath, &g_svcStopRequested);
     ReportSvcStatus(SERVICE_STOPPED);
 }
 
@@ -816,6 +919,8 @@ static bool RemoveService() {
  * MAIN
  * ============================================================================= */
 int main(int argc, char* argv[]) {
+    static volatile LONG g_consoleStopRequested = 0;
+
     if (argc >= 2) {
         const char* cmd = argv[1];
         if (_stricmp(cmd, "install") == 0) {
@@ -833,6 +938,12 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Remove failed. Error: " << GetLastError() << "\n";
             return 0;
         }
+        if (_stricmp(cmd, "loop") == 0 || _stricmp(cmd, "continuous") == 0) {
+            std::string outFile = "system_metrics_output.json";
+            std::cerr << "Starting continuous metrics mode. Writing to " << outFile << "\n";
+            RunMetricsWriteLoop(outFile, &g_consoleStopRequested);
+            return 0;
+        }
     }
 
     /* If started by SCM, dispatch to ServiceMain; otherwise run console one-shot */
@@ -846,7 +957,6 @@ int main(int argc, char* argv[]) {
     /* Console mode: one-shot metrics and file output */
     PrimeCpuReadings();
     Sleep(500);
-
     CpuData cpu = GetCpuData();
     auto cores = GetCpuCoresData();
     MemoryData mem = GetMemoryData();
@@ -855,7 +965,6 @@ int main(int argc, char* argv[]) {
     Sleep(1000);
     auto processes = GetProcessMetrics();
     std::string procTs = GetTimestamp();
-
     std::string jsonCompact = FormatMetricsJsonCompact(cpu, cores, mem, disks, processes, procTs);
     std::string jsonPretty = FormatMetricsJsonPretty(cpu, cores, mem, disks, processes, procTs);
 

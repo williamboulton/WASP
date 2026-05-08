@@ -3,6 +3,7 @@ FROM nginx:latest
 
 # Copy your local static files to the Nginx default directory
 COPY Native/src/ /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80 to allow traffic
 EXPOSE 80
