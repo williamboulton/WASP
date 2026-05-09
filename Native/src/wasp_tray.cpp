@@ -19,6 +19,7 @@ struct AppState {
   HINSTANCE instance = nullptr;
   HWND window = nullptr;
   NOTIFYICONDATAA trayIcon = {};
+  HICON customTrayIcon = nullptr;
   HANDLE backendProcess = nullptr;
   HANDLE senderProcess = nullptr;
 };
@@ -39,6 +40,25 @@ std::string GetExeDirectory() {
     return ".\\";
   }
   return path.substr(0, slash + 1);
+}
+
+HICON LoadCustomTrayIcon() {
+  const std::string exeDir = GetExeDirectory();
+  const std::string iconCandidates[] = {
+    exeDir + "assets\\wasp.ico",       // packaged alongside exe
+    exeDir + "wasp.ico",               // packaged flat next to exe
+    exeDir + "..\\src\\assets\\wasp.ico", // local dev from Native/build
+  };
+
+  for (const auto& iconPath : iconCandidates) {
+    HICON icon = reinterpret_cast<HICON>(
+      LoadImageA(nullptr, iconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE)
+    );
+    if (icon) {
+      return icon;
+    }
+  }
+  return nullptr;
 }
 
 std::string GetDataDirectory() {
@@ -372,7 +392,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
       app->trayIcon.uID = ID_TRAY_ICON;
       app->trayIcon.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
       app->trayIcon.uCallbackMessage = WMAPP_TRAY_ICON;
-      app->trayIcon.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+      app->customTrayIcon = LoadCustomTrayIcon();
+      app->trayIcon.hIcon = app->customTrayIcon ? app->customTrayIcon : LoadIcon(nullptr, IDI_APPLICATION);
       lstrcpynA(app->trayIcon.szTip, "WASP - Running", sizeof(app->trayIcon.szTip));
       Shell_NotifyIconA(NIM_ADD, &app->trayIcon);
 
@@ -413,6 +434,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_DESTROY:
       if (app) {
         Shell_NotifyIconA(NIM_DELETE, &app->trayIcon);
+        if (app->customTrayIcon) {
+          DestroyIcon(app->customTrayIcon);
+          app->customTrayIcon = nullptr;
+        }
         StopWaspProcesses(app);
       }
       PostQuitMessage(0);

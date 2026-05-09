@@ -88,6 +88,20 @@ foreach ($asset in $frontendAssets) {
     Copy-Item -Path $source -Destination (Join-Path $backendStaticDir $asset) -Force
 }
 
+# Keep static subdirectories (favicon/logo assets, etc.) in sync for backend-served UI.
+$frontendAssetDirs = @("assets")
+foreach ($dirName in $frontendAssetDirs) {
+    $sourceDir = Join-Path $nativeFrontendDir $dirName
+    if (-not (Test-Path $sourceDir)) {
+        continue
+    }
+    $destDir = Join-Path $backendStaticDir $dirName
+    if (Test-Path $destDir) {
+        Remove-Item -Path $destDir -Recurse -Force
+    }
+    Copy-Item -Path $sourceDir -Destination $backendStaticDir -Recurse -Force
+}
+
 if (-not $SkipBackendBuild) {
     Write-Step "Building backend JAR"
     Push-Location $backendDir

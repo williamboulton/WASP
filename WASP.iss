@@ -8,6 +8,7 @@
 #ifndef OutputDir
   #define OutputDir "."
 #endif
+#define AppIconPath AddBackslash(SourcePath) + "Native\\src\\assets\\wasp.ico"
 
 [Setup]
 AppId={{2F61B3C4-8A7B-4F0E-8D9A-75EEAFD87E7D}
@@ -24,7 +25,8 @@ SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
-UninstallDisplayIcon={app}\WASPBackend.exe
+SetupIconFile={#AppIconPath}
+UninstallDisplayIcon={app}\wasp.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -34,10 +36,11 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
+Source: "{#AppIconPath}"; DestDir: "{app}"; DestName: "wasp.ico"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\{#AppName}"; Filename: "{app}\WASPTray.exe"; IconFilename: "{app}\WASPTray.exe"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\WASPTray.exe"; IconFilename: "{app}\WASPTray.exe"; Tasks: desktopicon
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\WASPTray.exe"; IconFilename: "{app}\wasp.ico"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\WASPTray.exe"; IconFilename: "{app}\wasp.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\system_metrics.exe"; Parameters: "install"; Flags: runhidden waituntilterminated
