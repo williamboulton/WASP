@@ -13,6 +13,7 @@ const statusIndicatorEl = document.querySelector(".status-indicator");
 const currentDateEl = document.getElementById("currentDate");
 const themeToggleBtn = document.getElementById("themeToggle");
 const totalCpuValueEl = document.getElementById("totalCpuValue");
+const cpuClockValueEl = document.getElementById("cpuClockValue");
 const responsivenessValueEl = document.getElementById("responsivenessValue");
 const memoryTextEl = document.getElementById("memoryText");
 const memoryBarFillEl = document.getElementById("memoryBarFill");
@@ -318,6 +319,19 @@ function formatRate(bytesPerSec) {
 }
 
 /**
+ * Formats CPU MHz as a human-readable clock speed string.
+ * @param {number} mhz
+ * @returns {string}
+ */
+function formatCpuClock(mhz) {
+  if (typeof mhz !== "number" || mhz <= 0) return "–";
+  if (mhz >= 1000) {
+    return `${(mhz / 1000).toFixed(2)} GHz`;
+  }
+  return `${Math.round(mhz)} MHz`;
+}
+
+/**
  * Turns a snake_case JSON key into Title Case labels for detail tables.
  * @param {string} key
  * @returns {string}
@@ -454,6 +468,19 @@ function updateDiskView(data) {
  */
 function updateSummaryPanels(data) {
   if (data.cpu) {
+    if (cpuClockValueEl && typeof data.cpu.cpu_mhz === "number") {
+      let displayClockMhz = data.cpu.cpu_mhz;
+      if (Array.isArray(data.cpu_cores)) {
+        const maxCoreMhz = data.cpu_cores.reduce((max, core) => {
+          const coreMhz = typeof core?.core_mhz === "number" ? core.core_mhz : 0;
+          return Math.max(max, coreMhz);
+        }, 0);
+        if (maxCoreMhz > displayClockMhz) {
+          displayClockMhz = maxCoreMhz;
+        }
+      }
+      cpuClockValueEl.textContent = formatCpuClock(displayClockMhz);
+    }
     if (typeof data.cpu.cpu_usage_percent === "number") {
       totalCpuValueEl.textContent = `${data.cpu.cpu_usage_percent.toFixed(1)}%`;
     }
