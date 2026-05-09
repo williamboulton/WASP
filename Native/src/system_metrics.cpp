@@ -300,81 +300,133 @@ static std::vector<DWORD> GetPerCoreCurrentMhz() {
                 mhz[i] = buf[i].CurrentMhz;
         }
     }
+    std::vector<DWORD> baselineMhz = mhz;
 
     /*
-     * Some systems report fixed CurrentMhz but do expose dynamic "% of Maximum Frequency".
-     * If available, derive current MHz per logical core from MaxMhz * percent/100.
+     * Parse PDH Processor Information instance names like:
+     *   "0,0", "0,1", ... "1,0"
+     * into a logical processor index (group * 64 + indexInGroup).
+     */
+    auto parseLogicalIndex = [&](const char* name, int& outIndex) -> bool {
+        outIndex = -1;
+        if (!name || !name[0]) return false;
+        if (strcmp(name, "_Total") == 0) return false;
+
+        const char* comma = strrchr(name, ',');
+        if (!comma || !comma[1]) return false;
+        if (strcmp(comma + 1, "_Total") == 0) return false;
+
+        bool indexNumeric = true;
+        for (const char* p = comma + 1; *p; p++) {
+            if (!std::isdigit((unsigned char)*p)) {
+                indexNumeric = false;
+                break;
+            }
+        }
+        if (!indexNumeric) return false;
+
+        int group = 0;
+        int indexInGroup = atoi(comma + 1);
+        if (comma > name) {
+            std::string groupText(name, comma - name);
+            bool groupNumeric = !groupText.empty();
+            for (char c : groupText) {
+                if (!std::isdigit((unsigned char)c)) {
+                    groupNumeric = false;
+                    break;
+                }
+            }
+            if (groupNumeric)
+                group = atoi(groupText.c_str());
+        }
+
+        int logicalIndex = group * 64 + indexInGroup;
+        if (logicalIndex < 0 || logicalIndex >= (int)mhz.size()) return false;
+        outIndex = logicalIndex;
+        return true;
+    };
+
+    /*
+     * Use percentage-based counters as primary source because some systems expose
+     * "Processor Frequency" as a static/base value. We still read direct frequency
+     * and keep the best available value per core.
      */
     PDH_HQUERY hQuery = nullptr;
+    PDH_HCOUNTER hFreq = nullptr;
+    PDH_HCOUNTER hPerfPct = nullptr;
     PDH_HCOUNTER hPct = nullptr;
     if (PdhOpenQueryA(nullptr, 0, &hQuery) == ERROR_SUCCESS) {
-        if (PdhAddEnglishCounterA(hQuery, "\\Processor Information(*)\\% of Maximum Frequency", 0, &hPct) == ERROR_SUCCESS &&
+        bool haveFreqCounter = (PdhAddEnglishCounterA(hQuery, "\\Processor Information(*)\\Processor Frequency", 0, &hFreq) == ERROR_SUCCESS);
+        bool havePerfCounter = (PdhAddEnglishCounterA(hQuery, "\\Processor Information(*)\\% Processor Performance", 0, &hPerfPct) == ERROR_SUCCESS);
+        bool havePctCounter = (PdhAddEnglishCounterA(hQuery, "\\Processor Information(*)\\% of Maximum Frequency", 0, &hPct) == ERROR_SUCCESS);
+        if ((haveFreqCounter || havePerfCounter || havePctCounter) &&
             PdhCollectQueryData(hQuery) == ERROR_SUCCESS) {
-            DWORD bufferSize = 0, itemCount = 0;
-            PDH_STATUS status = PdhGetFormattedCounterArrayA(hPct, PDH_FMT_DOUBLE, &bufferSize, &itemCount, nullptr);
-            if (status == PDH_MORE_DATA && bufferSize > 0 && itemCount > 0) {
-                std::vector<unsigned char> raw(bufferSize);
-                auto* items = reinterpret_cast<PDH_FMT_COUNTERVALUE_ITEM_A*>(raw.data());
-                if (PdhGetFormattedCounterArrayA(hPct, PDH_FMT_DOUBLE, &bufferSize, &itemCount, items) == ERROR_SUCCESS) {
-                    for (DWORD i = 0; i < itemCount; i++) {
-                        if (items[i].FmtValue.CStatus != PDH_CSTATUS_VALID_DATA)
-                            continue;
-                        const char* name = items[i].szName;
-                        if (!name || !name[0])
-                            continue;
-                        if (strcmp(name, "_Total") == 0)
-                            continue;
+            /*
+             * Percentage-style PDH counters are often meaningful only after a second
+             * sample. Take a short follow-up sample before reading arrays.
+             */
+            Sleep(120);
+            PdhCollectQueryData(hQuery);
 
-                        const char* comma = strrchr(name, ',');
-                        if (!comma || !comma[1])
-                            continue;
-                        if (strcmp(comma + 1, "_Total") == 0)
-                            continue;
+            if (haveFreqCounter) {
+                DWORD bufferSize = 0, itemCount = 0;
+                PDH_STATUS status = PdhGetFormattedCounterArrayA(hFreq, PDH_FMT_DOUBLE, &bufferSize, &itemCount, nullptr);
+                if (status == PDH_MORE_DATA && bufferSize > 0 && itemCount > 0) {
+                    std::vector<unsigned char> raw(bufferSize);
+                    auto* items = reinterpret_cast<PDH_FMT_COUNTERVALUE_ITEM_A*>(raw.data());
+                    if (PdhGetFormattedCounterArrayA(hFreq, PDH_FMT_DOUBLE, &bufferSize, &itemCount, items) == ERROR_SUCCESS) {
+                        for (DWORD i = 0; i < itemCount; i++) {
+                            if (items[i].FmtValue.CStatus != PDH_CSTATUS_VALID_DATA)
+                                continue;
+                            int logicalIndex = -1;
+                            if (!parseLogicalIndex(items[i].szName, logicalIndex))
+                                continue;
 
-                        bool indexNumeric = true;
-                        for (const char* p = comma + 1; *p; p++) {
-                            if (!std::isdigit((unsigned char)*p)) {
-                                indexNumeric = false;
-                                break;
-                            }
+                            double freqMhz = items[i].FmtValue.doubleValue;
+                            if (freqMhz > 0.0)
+                                mhz[logicalIndex] = (DWORD)(freqMhz + 0.5);
                         }
-                        if (!indexNumeric)
-                            continue;
-
-                        int group = 0;
-                        int indexInGroup = atoi(comma + 1);
-                        if (comma > name) {
-                            std::string groupText(name, comma - name);
-                            bool groupNumeric = !groupText.empty();
-                            for (char c : groupText) {
-                                if (!std::isdigit((unsigned char)c)) {
-                                    groupNumeric = false;
-                                    break;
-                                }
-                            }
-                            if (groupNumeric)
-                                group = atoi(groupText.c_str());
-                        }
-
-                        int logicalIndex = group * 64 + indexInGroup;
-                        if (logicalIndex < 0 || logicalIndex >= (int)mhz.size())
-                            continue;
-
-                        double pct = items[i].FmtValue.doubleValue;
-                        if (pct < 0.0) pct = 0.0;
-                        if (pct > 100.0) pct = 100.0;
-
-                        DWORD baseMhz = 0;
-                        if (havePowerInfo && logicalIndex < (int)buf.size() && buf[logicalIndex].MaxMhz > 0)
-                            baseMhz = buf[logicalIndex].MaxMhz;
-                        else if (mhz[logicalIndex] > 0)
-                            baseMhz = mhz[logicalIndex];
-
-                        if (baseMhz > 0)
-                            mhz[logicalIndex] = (DWORD)((baseMhz * pct) / 100.0 + 0.5);
                     }
                 }
             }
+
+            auto mergePercentCounter = [&](PDH_HCOUNTER counter) {
+                DWORD bufferSize = 0, itemCount = 0;
+                PDH_STATUS status = PdhGetFormattedCounterArrayA(counter, PDH_FMT_DOUBLE, &bufferSize, &itemCount, nullptr);
+                if (status == PDH_MORE_DATA && bufferSize > 0 && itemCount > 0) {
+                    std::vector<unsigned char> raw(bufferSize);
+                    auto* items = reinterpret_cast<PDH_FMT_COUNTERVALUE_ITEM_A*>(raw.data());
+                    if (PdhGetFormattedCounterArrayA(counter, PDH_FMT_DOUBLE, &bufferSize, &itemCount, items) == ERROR_SUCCESS) {
+                        for (DWORD i = 0; i < itemCount; i++) {
+                            if (items[i].FmtValue.CStatus != PDH_CSTATUS_VALID_DATA)
+                                continue;
+                            int logicalIndex = -1;
+                            if (!parseLogicalIndex(items[i].szName, logicalIndex))
+                                continue;
+                            double pct = items[i].FmtValue.doubleValue;
+                            if (pct < 0.0) pct = 0.0;
+
+                            DWORD baseMhz = 0;
+                            if (havePowerInfo && logicalIndex < (int)buf.size() && buf[logicalIndex].MaxMhz > 0)
+                                baseMhz = buf[logicalIndex].MaxMhz;
+                            else if (logicalIndex < (int)baselineMhz.size() && baselineMhz[logicalIndex] > 0)
+                                baseMhz = baselineMhz[logicalIndex];
+
+                            if (baseMhz > 0) {
+                                DWORD derived = (DWORD)((baseMhz * pct) / 100.0 + 0.5);
+                                if (derived > mhz[logicalIndex])
+                                    mhz[logicalIndex] = derived;
+                            }
+                        }
+                    }
+                }
+            };
+
+            /* Prefer percentage-based readings (including turbo >100%) and keep max. */
+            if (havePerfCounter)
+                mergePercentCounter(hPerfPct);
+            if (havePctCounter)
+                mergePercentCounter(hPct);
         }
         PdhCloseQuery(hQuery);
     }
