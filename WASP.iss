@@ -50,3 +50,14 @@ Filename: "{app}\WASPTray.exe"; Description: "Launch {#AppName}"; Flags: nowait 
 [UninstallRun]
 Filename: "sc.exe"; Parameters: "stop SystemMetricsService"; Flags: runhidden waituntilterminated; RunOnceId: "StopSystemMetricsService"
 Filename: "{app}\system_metrics.exe"; Parameters: "remove"; Flags: runhidden waituntilterminated; RunOnceId: "RemoveSystemMetricsService"
+
+[UninstallDelete]
+; Backend database and runtime artifacts are written outside {app}, so delete them explicitly.
+Type: files; Name: "{%USERPROFILE}\wasp.db"
+Type: files; Name: "{commonappdata}\WASP\system_metrics_output.json"
+Type: files; Name: "{localappdata}\WASP\system_metrics_output.json"
+Type: files; Name: "{localappdata}\WASP\logs\system_metrics.log"
+Type: files; Name: "{localappdata}\WASP\logs\send_client.log"
+Type: dirifempty; Name: "{commonappdata}\WASP"
+Type: dirifempty; Name: "{localappdata}\WASP\logs"
+Type: dirifempty; Name: "{localappdata}\WASP"
