@@ -13,6 +13,7 @@ const statusIndicatorEl = document.querySelector(".status-indicator");
 const currentDateEl = document.getElementById("currentDate");
 const themeToggleBtn = document.getElementById("themeToggle");
 const totalCpuValueEl = document.getElementById("totalCpuValue");
+const cpuClockValueEl = document.getElementById("cpuClockValue");
 const responsivenessValueEl = document.getElementById("responsivenessValue");
 const memoryTextEl = document.getElementById("memoryText");
 const memoryBarFillEl = document.getElementById("memoryBarFill");
@@ -277,6 +278,16 @@ function formatBytesToGiB(bytes) {
 }
 
 /**
+ * Formats a byte count as MiB with two decimal places.
+ * @param {number} bytes
+ * @returns {string}
+ */
+function formatBytesToMiB(bytes) {
+  if (typeof bytes !== "number") return "–";
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
+}
+
+/**
  * Formats a memory object field for display in the Memory details table.
  * Byte fields get raw + GiB; numbers get locale formatting; others stringify.
  * @param {string} key
@@ -305,6 +316,19 @@ function formatRate(bytesPerSec) {
   if (mb >= 1) return `${mb.toFixed(2)} MB/s`;
   if (kb >= 1) return `${kb.toFixed(2)} KB/s`;
   return `${bytesPerSec.toFixed(0)} B/s`;
+}
+
+/**
+ * Formats CPU MHz as a human-readable clock speed string.
+ * @param {number} mhz
+ * @returns {string}
+ */
+function formatCpuClock(mhz) {
+  if (typeof mhz !== "number" || mhz <= 0) return "–";
+  if (mhz >= 1000) {
+    return `${(mhz / 1000).toFixed(2)} GHz`;
+  }
+  return `${Math.round(mhz)} MHz`;
 }
 
 /**
@@ -370,10 +394,10 @@ function updateMemoryView(data) {
  * @returns {string}
  */
 function formatDiskField(key, value) {
+  if (typeof value === "number" && key.endsWith("_bytes_per_sec")) {
+    return `${value.toLocaleString()} (${formatBytesToMiB(value)})`;
+  }
   if (typeof value === "number" && key.endsWith("_bytes")) {
-    if (key.includes("speed")) {
-      return `${value.toLocaleString()} (${formatRate(value)})`;
-    }
     return `${value.toLocaleString()} (${formatBytesToGiB(value)})`;
   }
   if (typeof value === "number") {
@@ -444,6 +468,19 @@ function updateDiskView(data) {
  */
 function updateSummaryPanels(data) {
   if (data.cpu) {
+    if (cpuClockValueEl && typeof data.cpu.cpu_mhz === "number") {
+      let displayClockMhz = data.cpu.cpu_mhz;
+      if (Array.isArray(data.cpu_cores)) {
+        const maxCoreMhz = data.cpu_cores.reduce((max, core) => {
+          const coreMhz = typeof core?.core_mhz === "number" ? core.core_mhz : 0;
+          return Math.max(max, coreMhz);
+        }, 0);
+        if (maxCoreMhz > displayClockMhz) {
+          displayClockMhz = maxCoreMhz;
+        }
+      }
+      cpuClockValueEl.textContent = formatCpuClock(displayClockMhz);
+    }
     if (typeof data.cpu.cpu_usage_percent === "number") {
       totalCpuValueEl.textContent = `${data.cpu.cpu_usage_percent.toFixed(1)}%`;
     }

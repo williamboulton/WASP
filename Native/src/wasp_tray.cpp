@@ -13,14 +13,15 @@ constexpr UINT ID_MENU_EXIT = 2002;
 constexpr UINT_PTR ID_TIMER_OPEN_BROWSER = 3001;
 const char* kWindowClass = "WASPTrayWindowClass";
 const char* kMutexName = "Global\\WASPTraySingleton";
+const char* kMetricsServiceName = "SystemMetricsService";
 
 struct AppState {
   HINSTANCE instance = nullptr;
   HWND window = nullptr;
   NOTIFYICONDATAA trayIcon = {};
+  HICON customTrayIcon = nullptr;
   HANDLE backendProcess = nullptr;
   HANDLE senderProcess = nullptr;
-  HANDLE metricsLoopProcess = nullptr;
 };
 
 std::string Quote(const std::string& value) {
@@ -41,12 +42,42 @@ std::string GetExeDirectory() {
   return path.substr(0, slash + 1);
 }
 
+HICON LoadCustomTrayIcon() {
+  const std::string exeDir = GetExeDirectory();
+  const std::string iconCandidates[] = {
+    exeDir + "assets\\wasp.ico",       // packaged alongside exe
+    exeDir + "wasp.ico",               // packaged flat next to exe
+    exeDir + "..\\src\\assets\\wasp.ico", // local dev from Native/build
+  };
+
+  for (const auto& iconPath : iconCandidates) {
+    HICON icon = reinterpret_cast<HICON>(
+      LoadImageA(nullptr, iconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE)
+    );
+    if (icon) {
+      return icon;
+    }
+  }
+  return nullptr;
+}
+
 std::string GetDataDirectory() {
   const char* localAppData = std::getenv("LOCALAPPDATA");
   if (!localAppData || localAppData[0] == '\0') {
     return ".\\";
   }
   return std::string(localAppData) + "\\WASP";
+}
+
+std::string GetProgramDataMetricsPath() {
+  const char* programData = std::getenv("ProgramData");
+  if (!programData || programData[0] == '\0') {
+    return GetExeDirectory() + "system_metrics_output.json";
+  }
+
+  const std::string dir = std::string(programData) + "\\WASP";
+  CreateDirectoryA(dir.c_str(), nullptr);
+  return dir + "\\system_metrics_output.json";
 }
 
 bool StartHiddenProcess(const std::string& command, HANDLE* outHandle) {
@@ -115,6 +146,148 @@ void OpenFrontend() {
   ShellExecuteA(nullptr, "open", "http://localhost:8080/", nullptr, nullptr, SW_SHOWNORMAL);
 }
 
+bool IsMetricsServiceInstalled() {
+  SC_HANDLE scm = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_CONNECT);
+  if (!scm) {
+    return false;
+  }
+
+  SC_HANDLE service = OpenServiceA(scm, kMetricsServiceName, SERVICE_QUERY_STATUS);
+  const bool installed = (service != nullptr);
+  if (service) {
+    CloseServiceHandle(service);
+  }
+  CloseServiceHandle(scm);
+  return installed;
+}
+
+bool EnsureMetricsServiceInstalled(const std::string& appDir) {
+  if (IsMetricsServiceInstalled()) {
+    return true;
+  }
+  RunHiddenAndWait(Quote(appDir + "system_metrics.exe") + " install");
+  return IsMetricsServiceInstalled();
+}
+
+bool StartMetricsService() {
+  SC_HANDLE scm = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_CONNECT);
+  if (!scm) {
+    return false;
+  }
+
+  SC_HANDLE queryHandle = OpenServiceA(
+    scm,
+    kMetricsServiceName,
+    SERVICE_QUERY_STATUS
+  );
+  if (!queryHandle) {
+    CloseServiceHandle(scm);
+    return false;
+  }
+
+  SERVICE_STATUS_PROCESS status = {};
+  DWORD bytesNeeded = 0;
+  bool ok = QueryServiceStatusEx(
+    queryHandle,
+    SC_STATUS_PROCESS_INFO,
+    reinterpret_cast<LPBYTE>(&status),
+    sizeof(status),
+    &bytesNeeded
+  ) != FALSE;
+
+  if (ok && (status.dwCurrentState == SERVICE_RUNNING || status.dwCurrentState == SERVICE_START_PENDING)) {
+    CloseServiceHandle(queryHandle);
+    CloseServiceHandle(scm);
+    return true;
+  }
+
+  CloseServiceHandle(queryHandle);
+
+  SC_HANDLE startHandle = OpenServiceA(
+    scm,
+    kMetricsServiceName,
+    SERVICE_START
+  );
+  if (!startHandle) {
+    CloseServiceHandle(scm);
+    return false;
+  }
+
+  if (!StartServiceA(startHandle, 0, nullptr)) {
+    const DWORD err = GetLastError();
+    if (err != ERROR_SERVICE_ALREADY_RUNNING) {
+      CloseServiceHandle(startHandle);
+      CloseServiceHandle(scm);
+      return false;
+    }
+  }
+
+  CloseServiceHandle(startHandle);
+  CloseServiceHandle(scm);
+  return true;
+}
+
+DWORD GetMetricsServiceState(SC_HANDLE service) {
+  SERVICE_STATUS_PROCESS status = {};
+  DWORD bytesNeeded = 0;
+  if (!QueryServiceStatusEx(
+        service,
+        SC_STATUS_PROCESS_INFO,
+        reinterpret_cast<LPBYTE>(&status),
+        sizeof(status),
+        &bytesNeeded
+      )) {
+    return SERVICE_STOPPED;
+  }
+  return status.dwCurrentState;
+}
+
+void StopMetricsService() {
+  SC_HANDLE scm = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_CONNECT);
+  if (!scm) {
+    return;
+  }
+
+  SC_HANDLE service = OpenServiceA(
+    scm,
+    kMetricsServiceName,
+    SERVICE_STOP | SERVICE_QUERY_STATUS
+  );
+  if (!service) {
+    CloseServiceHandle(scm);
+    return;
+  }
+
+  DWORD state = GetMetricsServiceState(service);
+  if (state == SERVICE_STOPPED) {
+    CloseServiceHandle(service);
+    CloseServiceHandle(scm);
+    return;
+  }
+
+  SERVICE_STATUS status = {};
+  if (!ControlService(service, SERVICE_CONTROL_STOP, &status)) {
+    const DWORD err = GetLastError();
+    // In some user contexts, the direct stop request can fail even though
+    // shell-level service control still succeeds.
+    if (err != ERROR_SERVICE_NOT_ACTIVE) {
+      RunHiddenAndWait("sc.exe stop SystemMetricsService >nul 2>nul");
+    }
+  }
+
+  // Wait up to ~10s for SCM to report fully stopped.
+  for (int i = 0; i < 50; ++i) {
+    state = GetMetricsServiceState(service);
+    if (state == SERVICE_STOPPED) {
+      break;
+    }
+    Sleep(200);
+  }
+
+  CloseServiceHandle(service);
+  CloseServiceHandle(scm);
+}
+
 bool StartWaspProcesses(AppState* app) {
   if (!app) {
     return false;
@@ -122,33 +295,42 @@ bool StartWaspProcesses(AppState* app) {
 
   // Ensure relaunching from Start menu behaves predictably.
   KillImage("send_client.exe");
-  KillImage("system_metrics.exe");
   KillImage("WASPBackend.exe");
 
   const std::string appDir = GetExeDirectory();
-  const std::string dataDir = GetDataDirectory();
-  CreateDirectoryA(dataDir.c_str(), nullptr);
+  if (!EnsureMetricsServiceInstalled(appDir)) {
+    MessageBoxA(
+      nullptr,
+      "System metrics service is not installed. Reinstall WASP as Administrator.",
+      "WASP",
+      MB_ICONERROR | MB_OK
+    );
+    return false;
+  }
+
+  if (!StartMetricsService()) {
+    MessageBoxA(
+      nullptr,
+      "Failed to start SystemMetricsService.",
+      "WASP",
+      MB_ICONERROR | MB_OK
+    );
+    return false;
+  }
+
   SetEnvironmentVariableA(
     "WASP_METRICS_JSON",
-    (dataDir + "\\system_metrics_output.json").c_str()
+    GetProgramDataMetricsPath().c_str()
   );
 
   const std::string backendExe = Quote(appDir + "WASPBackend.exe");
   const std::string senderExe = Quote(appDir + "send_client.exe");
-  const std::string loopBatch = Quote(appDir + "RunMetricsLoop.bat");
 
   if (!StartHiddenProcess(backendExe, &app->backendProcess)) {
     return false;
   }
 
-  const std::string loopCommand = "cmd.exe /c " + Quote(loopBatch);
-  if (!StartHiddenProcess(loopCommand, &app->metricsLoopProcess)) {
-    StopProcess(&app->backendProcess);
-    return false;
-  }
-
   if (!StartHiddenProcess(senderExe, &app->senderProcess)) {
-    StopProcess(&app->metricsLoopProcess);
     StopProcess(&app->backendProcess);
     return false;
   }
@@ -162,12 +344,11 @@ void StopWaspProcesses(AppState* app) {
   }
 
   StopProcess(&app->senderProcess);
-  StopProcess(&app->metricsLoopProcess);
   StopProcess(&app->backendProcess);
+  StopMetricsService();
 
   // Best-effort cleanup for any orphaned instances.
   KillImage("send_client.exe");
-  KillImage("system_metrics.exe");
   KillImage("WASPBackend.exe");
 }
 
@@ -211,7 +392,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
       app->trayIcon.uID = ID_TRAY_ICON;
       app->trayIcon.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
       app->trayIcon.uCallbackMessage = WMAPP_TRAY_ICON;
-      app->trayIcon.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+      app->customTrayIcon = LoadCustomTrayIcon();
+      app->trayIcon.hIcon = app->customTrayIcon ? app->customTrayIcon : LoadIcon(nullptr, IDI_APPLICATION);
       lstrcpynA(app->trayIcon.szTip, "WASP - Running", sizeof(app->trayIcon.szTip));
       Shell_NotifyIconA(NIM_ADD, &app->trayIcon);
 
@@ -252,6 +434,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     case WM_DESTROY:
       if (app) {
         Shell_NotifyIconA(NIM_DELETE, &app->trayIcon);
+        if (app->customTrayIcon) {
+          DestroyIcon(app->customTrayIcon);
+          app->customTrayIcon = nullptr;
+        }
         StopWaspProcesses(app);
       }
       PostQuitMessage(0);

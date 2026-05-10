@@ -10,3 +10,4 @@ wasp-backend/src/main/resources/static/
 # Local runtime artifacts
 output/
 system_metrics_output.json
+Native/metrics/system_metrics_output.json
