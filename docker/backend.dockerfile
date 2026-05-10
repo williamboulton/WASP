@@ -4,8 +4,8 @@ FROM eclipse-temurin:21-jre-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy jar into container
-COPY wasp-backend/target/wasp-backend-0.0.1-SNAPSHOT.jar app.jar
+# Copy the built backend jar (version-agnostic)
+COPY wasp-backend/target/wasp-backend-*.jar app.jar
 
 # Expose container port
 EXPOSE 8080

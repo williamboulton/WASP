@@ -1,6 +1,6 @@
 #define AppName "WASP"
 #ifndef AppVersion
-  #define AppVersion "0.0.0"
+  #define AppVersion "1.0.0"
 #endif
 #ifndef SourceDir
   #define SourceDir "."
@@ -14,7 +14,7 @@
 AppId={{2F61B3C4-8A7B-4F0E-8D9A-75EEAFD87E7D}
 AppName={#AppName}
 AppVersion={#AppVersion}
-AppPublisher=WASP
+AppPublisher=MSCS 710 Group 3
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
