@@ -22,6 +22,9 @@ public sealed class MetricsSnapshot
 
 public sealed class CpuSnapshot
 {
+    [JsonPropertyName("timestamp")]
+    public long? Timestamp { get; init; }
+
     [JsonPropertyName("cpu_usage_percent")]
     public double? CpuUsagePercent { get; init; }
 
@@ -46,6 +49,9 @@ public sealed class CpuCoreSnapshot
 
 public sealed class MemorySnapshot
 {
+    [JsonPropertyName("timestamp")]
+    public long? Timestamp { get; init; }
+
     [JsonPropertyName("memory_usage_percent")]
     public double? MemoryUsagePercent { get; init; }
 
@@ -54,10 +60,19 @@ public sealed class MemorySnapshot
 
     [JsonPropertyName("total_bytes")]
     public long? TotalBytes { get; init; }
+
+    [JsonPropertyName("free_bytes")]
+    public long? FreeBytes { get; init; }
+
+    [JsonPropertyName("page_fault_count")]
+    public long? PageFaultCount { get; init; }
 }
 
 public sealed class DiskSnapshot
 {
+    [JsonPropertyName("timestamp")]
+    public long? Timestamp { get; init; }
+
     [JsonPropertyName("drive_letter")]
     public string? DriveLetter { get; init; }
 

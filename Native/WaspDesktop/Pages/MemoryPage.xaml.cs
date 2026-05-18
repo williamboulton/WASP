@@ -46,5 +46,10 @@ public sealed partial class MemoryPage : Page
         var used = Formatters.GiB(memory?.UsedBytes);
         var total = Formatters.GiB(memory?.TotalBytes);
         MemorySummaryText.Text = $"{Formatters.Percent(memory?.MemoryUsagePercent)} ({used} / {total})";
+        TotalMemoryText.Text = total;
+        FreeMemoryText.Text = Formatters.GiB(memory?.FreeBytes);
+        UsedMemoryText.Text = used;
+        MemoryUsagePercentText.Text = Formatters.Percent(memory?.MemoryUsagePercent);
+        PageFaultCountText.Text = Formatters.Integer(memory?.PageFaultCount);
     }
 }

@@ -11,20 +11,67 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Memory" />
-        <TextBlock
-            x:Name="MemorySummaryText"
-            Grid.Row="1"
-            Style="{StaticResource SubtitleTextBlockStyle}"
-            Text="Waiting for data..." />
-        <ProgressBar
-            x:Name="MemoryUsageBar"
-            Grid.Row="2"
-            Minimum="0"
-            Maximum="100"
-            Value="0" />
+
+        <Border Grid.Row="1" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <StackPanel Spacing="8">
+                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Memory In Use" />
+                <TextBlock x:Name="MemorySummaryText" Style="{StaticResource SubtitleTextBlockStyle}" Text="Waiting for data..." />
+                <ProgressBar
+                    x:Name="MemoryUsageBar"
+                    Minimum="0"
+                    Maximum="100"
+                    Value="0" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <StackPanel Spacing="10">
+                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Memory Details" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Total Memory" />
+                    <TextBlock x:Name="TotalMemoryText" Grid.Column="1" HorizontalAlignment="Right" Text="-" />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Free Memory" />
+                    <TextBlock x:Name="FreeMemoryText" Grid.Column="1" HorizontalAlignment="Right" Text="-" />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Used Memory" />
+                    <TextBlock x:Name="UsedMemoryText" Grid.Column="1" HorizontalAlignment="Right" Text="-" />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Memory Usage Percent" />
+                    <TextBlock x:Name="MemoryUsagePercentText" Grid.Column="1" HorizontalAlignment="Right" Text="-" />
+                </Grid>
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Page Fault Count" />
+                    <TextBlock x:Name="PageFaultCountText" Grid.Column="1" HorizontalAlignment="Right" Text="-" />
+                </Grid>
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>
