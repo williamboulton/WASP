@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="WaspDesktop.Pages.MemoryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="24,16,24,16" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Memory" />
+        <TextBlock
+            x:Name="MemorySummaryText"
+            Grid.Row="1"
+            Style="{StaticResource SubtitleTextBlockStyle}"
+            Text="Waiting for data..." />
+        <ProgressBar
+            x:Name="MemoryUsageBar"
+            Grid.Row="2"
+            Minimum="0"
+            Maximum="100"
+            Value="0" />
+    </Grid>
+</Page>
