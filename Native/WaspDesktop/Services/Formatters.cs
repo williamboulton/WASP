@@ -47,4 +47,14 @@ public static class Formatters
 
         return $"{value} B/s";
     }
+
+    public static string Integer(long? value)
+    {
+        if (value is null)
+        {
+            return "-";
+        }
+
+        return value.Value.ToString("N0");
+    }
 }

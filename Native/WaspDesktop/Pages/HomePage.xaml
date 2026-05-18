@@ -4,85 +4,149 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:WaspDesktop.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Padding="24,16,24,16" RowSpacing="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <ScrollViewer>
+        <Grid Padding="24,16,24,16" RowSpacing="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Main Dashboard" />
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Main Dashboard" />
 
-        <TextBlock
-            x:Name="ConnectionStatusText"
-            Grid.Row="1"
-            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-            Text="Connecting..." />
+            <TextBlock
+                x:Name="ConnectionStatusText"
+                Grid.Row="1"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="Connecting..." />
 
-        <Grid Grid.Row="2" ColumnSpacing="12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <Border Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel>
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="CPU Usage" />
-                    <TextBlock x:Name="CpuUsageText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+                <Border Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="CPU Usage" />
+                        <TextBlock x:Name="CpuUsageText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="CPU Clock" />
+                        <TextBlock x:Name="CpuClockText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Responsiveness" />
+                        <TextBlock x:Name="ResponsivenessText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="3" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Memory Usage" />
+                        <TextBlock x:Name="MemoryText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="3" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="8">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="CPU and Memory Usage" />
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Height="180">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" VerticalAlignment="Top" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="100%" />
+                            <TextBlock Grid.Row="1" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="75%" />
+                            <TextBlock Grid.Row="2" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="50%" />
+                            <TextBlock Grid.Row="3" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="25%" />
+                            <TextBlock Grid.Row="4" VerticalAlignment="Bottom" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="0%" />
+                        </Grid>
+                        <Canvas x:Name="HistoryCanvas" Grid.Column="1" Height="180" SizeChanged="HistoryCanvas_SizeChanged" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <TextBlock Foreground="#F59E0B" Text="CPU %" />
+                        <TextBlock Foreground="#60A5FA" Text="Memory %" />
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel>
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="CPU Clock" />
-                    <TextBlock x:Name="CpuClockText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+            <Border Grid.Row="4" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="8">
+                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="CPU Cores" />
+                    <GridView
+                        x:Name="CoreGrid"
+                        SelectionMode="None"
+                        IsItemClickEnabled="False"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                        ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <GridView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Width="90" HorizontalAlignment="Center" Spacing="6">
+                                    <Grid Width="70" Height="70">
+                                        <Ellipse Fill="#1F2937" Stroke="#334155" StrokeThickness="1" />
+                                        <Path Data="{Binding SliceGeometry}" Fill="#22C55E" />
+                                        <Ellipse Stroke="#334155" StrokeThickness="1" Fill="Transparent" />
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding UsageText}" />
+                                    </Grid>
+                                    <TextBlock HorizontalAlignment="Center" Text="{Binding Label}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="2" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <Border Grid.Row="5" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel>
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Responsiveness" />
-                    <TextBlock x:Name="ResponsivenessText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="3" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <StackPanel>
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Memory Usage" />
-                    <TextBlock x:Name="MemoryText" Style="{StaticResource SubtitleTextBlockStyle}" Text="-" />
+                    <TextBlock Margin="0,0,0,8" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Top Active Processes" />
+                    <ListView x:Name="ProcessList">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding CpuText}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding PidText}" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Owner}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </Border>
         </Grid>
-
-        <Border Grid.Row="3" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-            <StackPanel>
-                <TextBlock Margin="0,0,0,8" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Top Active Processes" />
-                <ListView x:Name="ProcessList">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="220" />
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="80" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding Name}" />
-                                <TextBlock Grid.Column="1" Text="{Binding CpuText}" />
-                                <TextBlock Grid.Column="2" Text="{Binding PidText}" />
-                                <TextBlock Grid.Column="3" Text="{Binding Owner}" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </StackPanel>
-        </Border>
-    </Grid>
+    </ScrollViewer>
 </Page>
