@@ -27,10 +27,34 @@ if getattr(sys, "frozen", False):
     BASE_DIR = os.path.dirname(os.path.abspath(sys.executable))
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_PATH = os.environ.get(
-    "WASP_METRICS_JSON",
+
+ENV_JSON_PATH = os.environ.get("WASP_METRICS_JSON")
+JSON_CANDIDATES = [
+    os.path.join(BASE_DIR, "metrics", "system_metrics_output.json"),
     os.path.join(BASE_DIR, "system_metrics_output.json"),
-)
+]
+
+# Installed builds often run from ProgramData/LocalAppData paths.
+program_data = os.environ.get("ProgramData")
+if program_data:
+    JSON_CANDIDATES.append(os.path.join(program_data, "WASP", "system_metrics_output.json"))
+
+local_app_data = os.environ.get("LOCALAPPDATA")
+if local_app_data:
+    JSON_CANDIDATES.append(os.path.join(local_app_data, "WASP", "system_metrics_output.json"))
+
+
+def resolve_json_path():
+    """Return the best metrics JSON path for the current runtime context."""
+    if ENV_JSON_PATH:
+        return ENV_JSON_PATH
+
+    for candidate in JSON_CANDIDATES:
+        if os.path.exists(candidate):
+            return candidate
+
+    # Fall back to the most common local dev path so error logs are intuitive.
+    return JSON_CANDIDATES[0]
 # How often to push a fresh snapshot to the backend, in seconds.
 SEND_INTERVAL_SECONDS = 2.0
 
@@ -85,7 +109,8 @@ def build_payload_from_file():
     - Serializes the adapted Python object back into a JSON string that can
       be sent over the WebSocket.
     """
-    with open(JSON_PATH, "r") as f:
+    json_path = resolve_json_path()
+    with open(json_path, "r") as f:
         raw = json.load(f)
 
     cpu_cores = raw.get("cpu_cores", [])
@@ -95,7 +120,7 @@ def build_payload_from_file():
 
     normalize_payload_timestamps(raw)
 
-    return json.dumps(raw)
+    return json.dumps(raw), json_path
 
 
 async def relay_metrics():
@@ -122,9 +147,9 @@ async def relay_metrics():
 
                 while True:
                     try:
-                        payload_str = build_payload_from_file()
+                        payload_str, json_path = build_payload_from_file()
                         print(
-                            f"Sending metrics from '{JSON_PATH}' "
+                            f"Sending metrics from '{json_path}' "
                             f"(bytes={len(payload_str)}) at {time.strftime('%H:%M:%S')}"
                         )
                         await websocket.send(payload_str)
@@ -133,7 +158,7 @@ async def relay_metrics():
                         print("Connection closed while sending metrics:", e)
                         break
                     except FileNotFoundError:
-                        print(f"Metrics file '{JSON_PATH}' not found; retrying...")
+                        print(f"Metrics file '{resolve_json_path()}' not found; retrying...")
                     except Exception as e:
                         print("Error reading/sending metrics:", e)
 
