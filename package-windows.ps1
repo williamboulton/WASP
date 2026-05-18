@@ -2,6 +2,7 @@ param(
     [string]$AppName = "WASPBackend",
     [switch]$SkipBackendBuild,
     [switch]$SkipNativeBuild,
+    [switch]$SkipDesktopBuild,
     [switch]$SkipSenderBuild,
     [switch]$SkipInstaller
 )
@@ -37,7 +38,10 @@ function Resolve-IsccPath {
 $repoRoot = Split-Path -Parent $PSCommandPath
 $backendDir = Join-Path $repoRoot "wasp-backend"
 $nativeDir = Join-Path $repoRoot "Native"
-$nativeFrontendDir = Join-Path $nativeDir "src"
+$desktopProjectDir = Join-Path $nativeDir "WaspDesktop"
+$desktopProjectFile = Join-Path $desktopProjectDir "WaspDesktop.csproj"
+$desktopPublishDir = Join-Path $desktopProjectDir "bin\Release\net9.0-windows10.0.26100.0\win-x64\publish"
+$desktopExe = Join-Path $desktopPublishDir "WaspDesktop.exe"
 $nativeSenderScript = Join-Path $nativeDir "send_client.py"
 $nativeSenderExe = Join-Path $nativeDir "build\send_client.exe"
 $nativeTrayExe = Join-Path $nativeDir "build\WASPTray.exe"
@@ -46,11 +50,10 @@ $stagingDir = Join-Path $distDir "staging"
 $appImageDir = Join-Path $stagingDir "app-image"
 $installerDir = Join-Path $distDir "installer"
 $issPath = Join-Path $repoRoot "WASP.iss"
-$backendStaticDir = Join-Path $backendDir "src\main\resources\static"
 
 if (-not (Test-Path $backendDir)) { throw "Missing backend directory: $backendDir" }
 if (-not (Test-Path $nativeDir)) { throw "Missing native directory: $nativeDir" }
-if (-not (Test-Path $nativeFrontendDir)) { throw "Missing native frontend directory: $nativeFrontendDir" }
+if (-not (Test-Path $desktopProjectFile)) { throw "Missing desktop frontend project: $desktopProjectFile" }
 if (-not (Test-Path $nativeSenderScript)) { throw "Missing metrics sender script: $nativeSenderScript" }
 if (-not (Test-Path $issPath)) { throw "Missing installer definition: $issPath" }
 
@@ -74,39 +77,13 @@ if ([string]::IsNullOrWhiteSpace($packageVersion)) {
     $packageVersion = "1.0.0"
 }
 
-Write-Step "Syncing embedded frontend assets"
-if (-not (Test-Path $backendStaticDir)) {
-    New-Item -ItemType Directory -Path $backendStaticDir -Force | Out-Null
-}
-
-$frontendAssets = @("index.html", "main.js", "styles.css")
-foreach ($asset in $frontendAssets) {
-    $source = Join-Path $nativeFrontendDir $asset
-    if (-not (Test-Path $source)) {
-        throw "Missing frontend asset: $source"
-    }
-    Copy-Item -Path $source -Destination (Join-Path $backendStaticDir $asset) -Force
-}
-
-# Keep static subdirectories (favicon/logo assets, etc.) in sync for backend-served UI.
-$frontendAssetDirs = @("assets")
-foreach ($dirName in $frontendAssetDirs) {
-    $sourceDir = Join-Path $nativeFrontendDir $dirName
-    if (-not (Test-Path $sourceDir)) {
-        continue
-    }
-    $destDir = Join-Path $backendStaticDir $dirName
-    if (Test-Path $destDir) {
-        Remove-Item -Path $destDir -Recurse -Force
-    }
-    Copy-Item -Path $sourceDir -Destination $backendStaticDir -Recurse -Force
-}
+Write-Step "Skipping web frontend asset sync (native desktop frontend only)"
 
 if (-not $SkipBackendBuild) {
     Write-Step "Building backend JAR"
     Push-Location $backendDir
     try {
-        & ".\mvnw.cmd" clean package -DskipTests
+        & ".\mvnw.cmd" clean package -DskipTests -Pnative-installer
         if ($LASTEXITCODE -ne 0) {
             throw "Backend build failed."
         }
@@ -146,6 +123,24 @@ if (-not (Test-Path $nativeExe)) {
 
 if (-not (Test-Path $nativeTrayExe)) {
     throw "Could not find tray executable: $nativeTrayExe"
+}
+
+if (-not $SkipDesktopBuild) {
+    Write-Step "Publishing native desktop frontend (WinUI)"
+    Push-Location $desktopProjectDir
+    try {
+        & dotnet publish ".\WaspDesktop.csproj" -c Release -r win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -p:PublishTrimmed=false -p:PublishReadyToRun=false
+        if ($LASTEXITCODE -ne 0) {
+            throw "Desktop frontend publish failed."
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
+if (-not (Test-Path $desktopExe)) {
+    throw "Could not find published desktop frontend executable: $desktopExe"
 }
 
 if (-not $SkipSenderBuild) {
@@ -224,6 +219,11 @@ Write-Step "Copying native executable into app image"
 Copy-Item -Path $nativeExe -Destination (Join-Path $packagedAppRoot "system_metrics.exe") -Force
 Copy-Item -Path $nativeSenderExe -Destination (Join-Path $packagedAppRoot "send_client.exe") -Force
 Copy-Item -Path $nativeTrayExe -Destination (Join-Path $packagedAppRoot "WASPTray.exe") -Force
+$desktopPackagedDir = Join-Path $packagedAppRoot "WaspDesktop"
+if (Test-Path $desktopPackagedDir) {
+    Remove-Item -Path $desktopPackagedDir -Recurse -Force
+}
+Copy-Item -Path $desktopPublishDir -Destination $desktopPackagedDir -Recurse -Force
 
 $launcherPath = Join-Path $packagedAppRoot "LaunchWASP.bat"
 @"
@@ -253,7 +253,7 @@ start "" /min cmd /c ""%APP_DIR%RunMetricsLoop.bat""
 start "" /min "%APP_DIR%send_client.exe"
 
 timeout /t 3 /nobreak >nul
-start "" "http://localhost:8080/"
+start "" "%APP_DIR%WaspDesktop\WaspDesktop.exe"
 "@ | Set-Content -Path $launcherPath -Encoding ASCII
 
 $senderRunnerPath = Join-Path $packagedAppRoot "RunSender.bat"
@@ -290,7 +290,8 @@ shell.Run "cmd /c " & Chr(34) & Chr(34) & appDir & "\RunMetricsLoop.bat" & Chr(3
 shell.Run "cmd /c " & Chr(34) & Chr(34) & appDir & "\RunSender.bat" & Chr(34) & Chr(34), 0, False
 
 WScript.Sleep 3000
-shell.Run "http://localhost:8080/", 0, False
+desktopExe = appDir & "\WaspDesktop\WaspDesktop.exe"
+shell.Run Chr(34) & desktopExe & Chr(34), 1, False
 "@ | Set-Content -Path $launcherVbsPath -Encoding ASCII
 
 if (-not $SkipInstaller) {

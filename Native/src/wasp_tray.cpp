@@ -4,13 +4,14 @@
 
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 namespace {
 constexpr UINT WMAPP_TRAY_ICON = WM_APP + 1;
 constexpr UINT ID_TRAY_ICON = 1001;
 constexpr UINT ID_MENU_OPEN = 2001;
 constexpr UINT ID_MENU_EXIT = 2002;
-constexpr UINT_PTR ID_TIMER_OPEN_BROWSER = 3001;
+constexpr UINT_PTR ID_TIMER_OPEN_FRONTEND = 3001;
 const char* kWindowClass = "WASPTrayWindowClass";
 const char* kMutexName = "Global\\WASPTraySingleton";
 const char* kMetricsServiceName = "SystemMetricsService";
@@ -143,7 +144,50 @@ void StopProcess(HANDLE* handle) {
 }
 
 void OpenFrontend() {
-  ShellExecuteA(nullptr, "open", "http://localhost:8080/", nullptr, nullptr, SW_SHOWNORMAL);
+  const std::string appDir = GetExeDirectory();
+  const std::vector<std::string> frontendCandidates = {
+    appDir + "WaspDesktop\\WaspDesktop.exe",  // packaged with installer
+    appDir + "WaspDesktop.exe",                 // fallback if copied flat
+    appDir + "..\\WaspDesktop\\bin\\Debug\\net9.0-windows10.0.26100.0\\win-x64\\WaspDesktop.exe",    // local debug
+    appDir + "..\\WaspDesktop\\bin\\Release\\net9.0-windows10.0.26100.0\\win-x64\\publish\\WaspDesktop.exe" // local publish
+  };
+
+  DWORD lastError = ERROR_FILE_NOT_FOUND;
+  for (const auto& candidate : frontendCandidates) {
+    const DWORD attrs = GetFileAttributesA(candidate.c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES || (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+      continue;
+    }
+
+    STARTUPINFOA startupInfo = {};
+    startupInfo.cb = sizeof(startupInfo);
+    PROCESS_INFORMATION processInfo = {};
+    std::string commandLine = Quote(candidate);
+    const BOOL ok = CreateProcessA(
+      candidate.c_str(),
+      commandLine.data(),
+      nullptr,
+      nullptr,
+      FALSE,
+      0,
+      nullptr,
+      nullptr,
+      &startupInfo,
+      &processInfo
+    );
+    if (ok) {
+      CloseHandle(processInfo.hThread);
+      CloseHandle(processInfo.hProcess);
+      return;
+    }
+    lastError = GetLastError();
+  }
+
+  const std::string message =
+    "WASP could not launch the native desktop frontend (WaspDesktop.exe).\n"
+    "Error code: " + std::to_string(lastError) +
+    "\n\nReinstall WASP or verify the WaspDesktop files are present.";
+  MessageBoxA(nullptr, message.c_str(), "WASP Frontend Launch Failed", MB_ICONERROR | MB_OK);
 }
 
 bool IsMetricsServiceInstalled() {
@@ -403,12 +447,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
         return -1;
       }
 
-      SetTimer(hwnd, ID_TIMER_OPEN_BROWSER, 3000, nullptr);
+      SetTimer(hwnd, ID_TIMER_OPEN_FRONTEND, 3000, nullptr);
       return 0;
     }
     case WM_TIMER:
-      if (wParam == ID_TIMER_OPEN_BROWSER) {
-        KillTimer(hwnd, ID_TIMER_OPEN_BROWSER);
+      if (wParam == ID_TIMER_OPEN_FRONTEND) {
+        KillTimer(hwnd, ID_TIMER_OPEN_FRONTEND);
         OpenFrontend();
       }
       return 0;
