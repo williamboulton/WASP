@@ -13,22 +13,58 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Disk" />
-        <ListView x:Name="DiskList" Grid.Row="1">
-            <ListView.ItemTemplate>
+        <GridView
+            x:Name="DiskList"
+            Grid.Row="1"
+            SelectionMode="None"
+            IsItemClickEnabled="False"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <GridView.ItemTemplate>
                 <DataTemplate>
                     <Border
-                        Margin="0,0,0,10"
+                        Width="460"
+                        Margin="0,0,12,12"
                         Padding="12"
                         CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
                         Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                        <StackPanel Spacing="6">
-                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{Binding Name}" />
-                            <TextBlock Text="{Binding Capacity}" />
-                            <TextBlock Text="{Binding Throughput}" />
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="{Binding Name}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    Foreground="#22C55E"
+                                    Text="{Binding UsedPercentText}" />
+                            </Grid>
+
+                            <ProgressBar Minimum="0" Maximum="100" Value="{Binding UsedPercent}" />
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Capacity}" />
+
+                            <ItemsControl ItemsSource="{Binding Details}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="230" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}" />
+                                            <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="{Binding Value}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </GridView.ItemTemplate>
+        </GridView>
     </Grid>
 </Page>
