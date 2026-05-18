@@ -82,10 +82,10 @@ public sealed class DiskSnapshot
     [JsonPropertyName("free_bytes")]
     public long? FreeBytes { get; init; }
 
-    [JsonPropertyName("read_bytes_per_sec")]
+    [JsonPropertyName("read_speed_bytes_per_sec")]
     public long? ReadBytesPerSec { get; init; }
 
-    [JsonPropertyName("write_bytes_per_sec")]
+    [JsonPropertyName("write_speed_bytes_per_sec")]
     public long? WriteBytesPerSec { get; init; }
 }
 
