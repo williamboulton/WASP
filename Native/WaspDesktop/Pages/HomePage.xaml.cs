@@ -3,6 +3,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using WaspDesktop.Models;
 using WaspDesktop.Services;
 
@@ -18,12 +21,16 @@ public sealed partial class HomePage : Page
     private MetricsSnapshot? _lastHistorySnapshot;
     private readonly Queue<double> _cpuHistory = new();
     private readonly Queue<double> _memoryHistory = new();
+    private readonly ObservableCollection<CoreGaugeItem> _coreItems = [];
+    private readonly ObservableCollection<ProcessListItem> _processItems = [];
     private ProcessSortColumn _mainSortColumn = ProcessSortColumn.Cpu;
     private bool _mainSortAscending;
 
     public HomePage()
     {
         InitializeComponent();
+        CoreGrid.ItemsSource = _coreItems;
+        ProcessList.ItemsSource = _processItems;
         UpdateMainSortHeaderLabels();
     }
 
@@ -72,18 +79,26 @@ public sealed partial class HomePage : Page
         var coreItems = (snapshot?.CpuCores ?? [])
             .Where(c => c.CoreIndex is not null)
             .OrderBy(c => c.CoreIndex)
-            .Select(c => new CoreGaugeItem(c))
             .ToList();
-        CoreGrid.ItemsSource = coreItems;
+        ReconcileByKey(
+            _coreItems,
+            coreItems,
+            item => item.Key,
+            source => source.CoreIndex ?? -1,
+            source => new CoreGaugeItem(source),
+            (item, source) => item.UpdateFrom(source));
 
         var sortedProcesses = SortMainProcesses((snapshot?.Processes ?? [])
             .Where(p => (p.CpuPercent ?? 0) > 0));
 
         var items = sortedProcesses
             .Take(20)
-            .Select(p => new ProcessListItem(p))
             .ToList();
-        ProcessList.ItemsSource = items;
+        ReconcileByIndex(
+            _processItems,
+            items,
+            source => new ProcessListItem(source),
+            (item, source) => item.UpdateFrom(source));
     }
 
     private IEnumerable<ProcessSnapshot> SortMainProcesses(IEnumerable<ProcessSnapshot> source)
@@ -264,28 +279,133 @@ public sealed partial class HomePage : Page
 
         HistoryCanvas.Children.Add(polyline);
     }
+
+    private static void ReconcileByKey<TItem, TSource, TKey>(
+        ObservableCollection<TItem> target,
+        IReadOnlyList<TSource> desired,
+        Func<TItem, TKey> getItemKey,
+        Func<TSource, TKey> getSourceKey,
+        Func<TSource, TItem> createItem,
+        Action<TItem, TSource> updateItem) where TKey : notnull
+    {
+        for (var index = 0; index < desired.Count; index++)
+        {
+            var source = desired[index];
+            var desiredKey = getSourceKey(source);
+
+            if (index < target.Count && EqualityComparer<TKey>.Default.Equals(getItemKey(target[index]), desiredKey))
+            {
+                updateItem(target[index], source);
+                continue;
+            }
+
+            var existingIndex = -1;
+            for (var probe = index + 1; probe < target.Count; probe++)
+            {
+                if (EqualityComparer<TKey>.Default.Equals(getItemKey(target[probe]), desiredKey))
+                {
+                    existingIndex = probe;
+                    break;
+                }
+            }
+
+            if (existingIndex >= 0)
+            {
+                target.Move(existingIndex, index);
+                updateItem(target[index], source);
+            }
+            else
+            {
+                target.Insert(index, createItem(source));
+            }
+        }
+
+        while (target.Count > desired.Count)
+        {
+            target.RemoveAt(target.Count - 1);
+        }
+    }
+
+    private static void ReconcileByIndex<TItem, TSource>(
+        ObservableCollection<TItem> target,
+        IReadOnlyList<TSource> desired,
+        Func<TSource, TItem> createItem,
+        Action<TItem, TSource> updateItem)
+    {
+        var overlap = Math.Min(target.Count, desired.Count);
+        for (var index = 0; index < overlap; index++)
+        {
+            updateItem(target[index], desired[index]);
+        }
+
+        for (var index = overlap; index < desired.Count; index++)
+        {
+            target.Add(createItem(desired[index]));
+        }
+
+        while (target.Count > desired.Count)
+        {
+            target.RemoveAt(target.Count - 1);
+        }
+    }
 }
 
-public sealed class ProcessListItem(ProcessSnapshot source)
+public sealed class ProcessListItem : ObservableEntity
 {
-    public string Name { get; } = source.Name ?? string.Empty;
-    public string Owner { get; } = source.Owner ?? string.Empty;
-    public string CpuText { get; } = $"{(source.CpuPercent ?? 0):F1}%";
-    public string PidText { get; } = source.Pid?.ToString() ?? string.Empty;
-    public string Priority { get; } = source.Priority ?? string.Empty;
-    public string Location { get; } = source.Location ?? string.Empty;
+    private string _name = string.Empty;
+    private string _owner = string.Empty;
+    private string _cpuText = string.Empty;
+    private string _pidText = string.Empty;
+    private string _priority = string.Empty;
+    private string _location = string.Empty;
+
+    public string Key { get; private set; } = string.Empty;
+    public string Name { get => _name; private set => SetProperty(ref _name, value); }
+    public string Owner { get => _owner; private set => SetProperty(ref _owner, value); }
+    public string CpuText { get => _cpuText; private set => SetProperty(ref _cpuText, value); }
+    public string PidText { get => _pidText; private set => SetProperty(ref _pidText, value); }
+    public string Priority { get => _priority; private set => SetProperty(ref _priority, value); }
+    public string Location { get => _location; private set => SetProperty(ref _location, value); }
+
+    public ProcessListItem(ProcessSnapshot source)
+    {
+        UpdateFrom(source);
+    }
+
+    public static string BuildKey(ProcessSnapshot source) => $"{source.Pid?.ToString() ?? "0"}|{source.Name ?? string.Empty}";
+
+    public void UpdateFrom(ProcessSnapshot source)
+    {
+        Key = BuildKey(source);
+        Name = source.Name ?? string.Empty;
+        Owner = source.Owner ?? string.Empty;
+        CpuText = $"{(source.CpuPercent ?? 0):F1}%";
+        PidText = source.Pid?.ToString() ?? string.Empty;
+        Priority = source.Priority ?? string.Empty;
+        Location = source.Location ?? string.Empty;
+    }
 }
 
 
-public sealed class CoreGaugeItem
+public sealed class CoreGaugeItem : ObservableEntity
 {
-    public string Label { get; }
-    public string UsageText { get; }
-    public string SliceGeometry { get; }
+    private string _label = string.Empty;
+    private string _usageText = string.Empty;
+    private string _sliceGeometry = string.Empty;
+    public int Key { get; private set; }
+    public string Label { get => _label; private set => SetProperty(ref _label, value); }
+    public string UsageText { get => _usageText; private set => SetProperty(ref _usageText, value); }
+    public string SliceGeometry { get => _sliceGeometry; private set => SetProperty(ref _sliceGeometry, value); }
 
     public CoreGaugeItem(CpuCoreSnapshot source)
     {
+        UpdateFrom(source);
+    }
+
+    public void UpdateFrom(CpuCoreSnapshot source)
+    {
         var usage = Math.Clamp(source.CoreUsagePercent ?? 0, 0, 100);
+        Key = source.CoreIndex ?? -1;
         Label = $"CPU {source.CoreIndex ?? 0}";
         UsageText = $"{usage:F0}%";
         SliceGeometry = BuildPieSliceGeometry(usage);
@@ -314,5 +434,22 @@ public sealed class CoreGaugeItem
         var largeArcFlag = usagePercent > 50 ? 1 : 0;
 
         return $"M {cx:F2},{cy:F2} L {cx:F2},{cy - r:F2} A {r:F2},{r:F2} 0 {largeArcFlag},1 {endX:F2},{endY:F2} Z";
+    }
+}
+
+public abstract class ObservableEntity : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(storage, value))
+        {
+            return false;
+        }
+
+        storage = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
     }
 }

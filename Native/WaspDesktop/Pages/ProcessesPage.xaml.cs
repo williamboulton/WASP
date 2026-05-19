@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
 using WaspDesktop.Models;
 using WaspDesktop.Services;
 
@@ -10,12 +11,14 @@ public sealed partial class ProcessesPage : Page
 {
     private MetricsState? _metricsState;
     private IReadOnlyList<ProcessSnapshot> _allProcesses = [];
+    private readonly ObservableCollection<ProcessRow> _rows = [];
     private ProcessSortColumn _sortColumn = ProcessSortColumn.Cpu;
     private bool _sortAscending;
 
     public ProcessesPage()
     {
         InitializeComponent();
+        ProcessList.ItemsSource = _rows;
         UpdateSortHeaderLabels();
     }
 
@@ -102,16 +105,12 @@ public sealed partial class ProcessesPage : Page
 
         var sorted = SortProcesses(items);
         var projected = sorted
-            .Select(p => new ProcessRow(
-                p.Name ?? string.Empty,
-                p.Owner ?? string.Empty,
-                p.Pid?.ToString() ?? string.Empty,
-                p.Priority ?? string.Empty,
-                $"{(p.CpuPercent ?? 0):F1}%",
-                p.Location ?? string.Empty))
             .ToList();
-
-        ProcessList.ItemsSource = projected;
+        ReconcileByIndex(
+            _rows,
+            projected,
+            p => new ProcessRow(p),
+            (row, p) => row.UpdateFrom(p));
     }
 
     private IEnumerable<ProcessSnapshot> SortProcesses(IEnumerable<ProcessSnapshot> source)
@@ -176,7 +175,64 @@ public sealed partial class ProcessesPage : Page
 
         return asc ? $"{label} ▲" : $"{label} ▼";
     }
+
+    private static void ReconcileByIndex<TItem, TSource>(
+        ObservableCollection<TItem> target,
+        IReadOnlyList<TSource> desired,
+        Func<TSource, TItem> createItem,
+        Action<TItem, TSource> updateItem)
+    {
+        var overlap = Math.Min(target.Count, desired.Count);
+        for (var index = 0; index < overlap; index++)
+        {
+            updateItem(target[index], desired[index]);
+        }
+
+        for (var index = overlap; index < desired.Count; index++)
+        {
+            target.Add(createItem(desired[index]));
+        }
+
+        while (target.Count > desired.Count)
+        {
+            target.RemoveAt(target.Count - 1);
+        }
+    }
 }
 
-public sealed record ProcessRow(string Name, string Owner, string Pid, string Priority, string Cpu, string Location);
+public sealed class ProcessRow : ObservableEntity
+{
+    private string _name = string.Empty;
+    private string _owner = string.Empty;
+    private string _pid = string.Empty;
+    private string _priority = string.Empty;
+    private string _cpu = string.Empty;
+    private string _location = string.Empty;
+
+    public string Key { get; private set; } = string.Empty;
+    public string Name { get => _name; private set => SetProperty(ref _name, value); }
+    public string Owner { get => _owner; private set => SetProperty(ref _owner, value); }
+    public string Pid { get => _pid; private set => SetProperty(ref _pid, value); }
+    public string Priority { get => _priority; private set => SetProperty(ref _priority, value); }
+    public string Cpu { get => _cpu; private set => SetProperty(ref _cpu, value); }
+    public string Location { get => _location; private set => SetProperty(ref _location, value); }
+
+    public ProcessRow(ProcessSnapshot source)
+    {
+        UpdateFrom(source);
+    }
+
+    public static string BuildKey(ProcessSnapshot source) => $"{source.Pid?.ToString() ?? "0"}|{source.Name ?? string.Empty}";
+
+    public void UpdateFrom(ProcessSnapshot source)
+    {
+        Key = BuildKey(source);
+        Name = source.Name ?? string.Empty;
+        Owner = source.Owner ?? string.Empty;
+        Pid = source.Pid?.ToString() ?? string.Empty;
+        Priority = source.Priority ?? string.Empty;
+        Cpu = $"{(source.CpuPercent ?? 0):F1}%";
+        Location = source.Location ?? string.Empty;
+    }
+}
 
