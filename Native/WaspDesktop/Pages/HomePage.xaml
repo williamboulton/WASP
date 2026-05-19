@@ -127,20 +127,46 @@
             <Border Grid.Row="5" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel>
                     <TextBlock Margin="0,0,0,8" Style="{StaticResource BodyStrongTextBlockStyle}" Text="Top Active Processes" />
+                    <Grid Margin="0,0,0,6" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="110" />
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button x:Name="MainSortNameBtn" Content="Name" HorizontalAlignment="Left" Click="MainProcessHeaderSort_Click" Tag="name" Padding="0" MinWidth="0" BorderThickness="0" Background="Transparent" />
+                        <Button x:Name="MainSortOwnerBtn" Grid.Column="1" Content="Owner" HorizontalAlignment="Left" Click="MainProcessHeaderSort_Click" Tag="owner" Padding="0" MinWidth="0" BorderThickness="0" Background="Transparent" />
+                        <Button x:Name="MainSortPidBtn" Grid.Column="2" Content="PID" HorizontalAlignment="Left" Click="MainProcessHeaderSort_Click" Tag="pid" Padding="0" MinWidth="0" BorderThickness="0" Background="Transparent" />
+                        <Button x:Name="MainSortPriorityBtn" Grid.Column="3" Content="Priority" HorizontalAlignment="Left" Click="MainProcessHeaderSort_Click" Tag="priority" Padding="0" MinWidth="0" BorderThickness="0" Background="Transparent" />
+                        <Button x:Name="MainSortCpuBtn" Grid.Column="4" Content="CPU %" HorizontalAlignment="Left" Click="MainProcessHeaderSort_Click" Tag="cpu" Padding="0" MinWidth="0" BorderThickness="0" Background="Transparent" />
+                        <Button x:Name="MainSortLocationBtn" Grid.Column="5" Content="Location" HorizontalAlignment="Left" Click="MainProcessHeaderSort_Click" Tag="location" Padding="0" MinWidth="0" BorderThickness="0" Background="Transparent" />
+                    </Grid>
                     <ListView x:Name="ProcessList">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid ColumnSpacing="8">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="220" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="70" />
                                         <ColumnDefinition Width="120" />
                                         <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Name}" />
-                                    <TextBlock Grid.Column="1" Text="{Binding CpuText}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Owner}" />
                                     <TextBlock Grid.Column="2" Text="{Binding PidText}" />
-                                    <TextBlock Grid.Column="3" Text="{Binding Owner}" />
+                                    <TextBlock Grid.Column="3" Text="{Binding Priority}" />
+                                    <TextBlock Grid.Column="4" Text="{Binding CpuText}" />
+                                    <TextBlock Grid.Column="5" Text="{Binding Location}" />
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

@@ -18,10 +18,13 @@ public sealed partial class HomePage : Page
     private MetricsSnapshot? _lastHistorySnapshot;
     private readonly Queue<double> _cpuHistory = new();
     private readonly Queue<double> _memoryHistory = new();
+    private ProcessSortColumn _mainSortColumn = ProcessSortColumn.Cpu;
+    private bool _mainSortAscending;
 
     public HomePage()
     {
         InitializeComponent();
+        UpdateMainSortHeaderLabels();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -73,13 +76,107 @@ public sealed partial class HomePage : Page
             .ToList();
         CoreGrid.ItemsSource = coreItems;
 
-        var items = (snapshot?.Processes ?? [])
-            .Where(p => (p.CpuPercent ?? 0) > 0)
-            .OrderByDescending(p => p.CpuPercent ?? 0)
+        var sortedProcesses = SortMainProcesses((snapshot?.Processes ?? [])
+            .Where(p => (p.CpuPercent ?? 0) > 0));
+
+        var items = sortedProcesses
             .Take(20)
             .Select(p => new ProcessListItem(p))
             .ToList();
         ProcessList.ItemsSource = items;
+    }
+
+    private IEnumerable<ProcessSnapshot> SortMainProcesses(IEnumerable<ProcessSnapshot> source)
+    {
+        IOrderedEnumerable<ProcessSnapshot> ordered = _mainSortColumn switch
+        {
+            ProcessSortColumn.Name => _mainSortAscending
+                ? source.OrderBy(p => p.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                : source.OrderByDescending(p => p.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase),
+            ProcessSortColumn.Owner => _mainSortAscending
+                ? source.OrderBy(p => p.Owner ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                : source.OrderByDescending(p => p.Owner ?? string.Empty, StringComparer.OrdinalIgnoreCase),
+            ProcessSortColumn.Pid => _mainSortAscending
+                ? source.OrderBy(p => p.Pid ?? 0)
+                : source.OrderByDescending(p => p.Pid ?? 0),
+            ProcessSortColumn.Priority => _mainSortAscending
+                ? source.OrderBy(p => PriorityRank(p.Priority))
+                : source.OrderByDescending(p => PriorityRank(p.Priority)),
+            ProcessSortColumn.Location => _mainSortAscending
+                ? source.OrderBy(p => p.Location ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                : source.OrderByDescending(p => p.Location ?? string.Empty, StringComparer.OrdinalIgnoreCase),
+            _ => _mainSortAscending
+                ? source.OrderBy(p => p.CpuPercent ?? 0)
+                : source.OrderByDescending(p => p.CpuPercent ?? 0)
+        };
+        return ordered;
+    }
+
+    private static int PriorityRank(string? priority)
+    {
+        var value = (priority ?? string.Empty).Trim().ToLowerInvariant().Replace("_", " ");
+        return value switch
+        {
+            "idle" => 0,
+            "below normal" => 1,
+            "normal" => 2,
+            "above normal" => 3,
+            "high" => 4,
+            "real time" => 5,
+            "realtime" => 5,
+            _ => int.MaxValue
+        };
+    }
+
+    private void MainProcessHeaderSort_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string tag })
+        {
+            return;
+        }
+
+        var requested = tag switch
+        {
+            "name" => ProcessSortColumn.Name,
+            "owner" => ProcessSortColumn.Owner,
+            "pid" => ProcessSortColumn.Pid,
+            "priority" => ProcessSortColumn.Priority,
+            "location" => ProcessSortColumn.Location,
+            _ => ProcessSortColumn.Cpu
+        };
+
+        if (_mainSortColumn == requested)
+        {
+            _mainSortAscending = !_mainSortAscending;
+        }
+        else
+        {
+            _mainSortColumn = requested;
+            _mainSortAscending = true;
+        }
+
+        UpdateMainSortHeaderLabels();
+        Render();
+    }
+
+    private void UpdateMainSortHeaderLabels()
+    {
+        MainSortNameBtn.Content = SortHeaderText("Name", ProcessSortColumn.Name, _mainSortColumn, _mainSortAscending);
+        MainSortOwnerBtn.Content = SortHeaderText("Owner", ProcessSortColumn.Owner, _mainSortColumn, _mainSortAscending);
+        MainSortPidBtn.Content = SortHeaderText("PID", ProcessSortColumn.Pid, _mainSortColumn, _mainSortAscending);
+        MainSortPriorityBtn.Content = SortHeaderText("Priority", ProcessSortColumn.Priority, _mainSortColumn, _mainSortAscending);
+        MainSortCpuBtn.Content = SortHeaderText("CPU %", ProcessSortColumn.Cpu, _mainSortColumn, _mainSortAscending);
+        MainSortLocationBtn.Content = SortHeaderText("Location", ProcessSortColumn.Location, _mainSortColumn, _mainSortAscending);
+    }
+
+    private static string SortHeaderText(string label, ProcessSortColumn thisColumn, ProcessSortColumn activeColumn, bool asc)
+    {
+        if (thisColumn != activeColumn)
+        {
+            return label;
+        }
+
+        return asc ? $"{label} ▲" : $"{label} ▼";
     }
 
     private void UpdateHistory(MetricsSnapshot? snapshot)
@@ -175,7 +272,10 @@ public sealed class ProcessListItem(ProcessSnapshot source)
     public string Owner { get; } = source.Owner ?? string.Empty;
     public string CpuText { get; } = $"{(source.CpuPercent ?? 0):F1}%";
     public string PidText { get; } = source.Pid?.ToString() ?? string.Empty;
+    public string Priority { get; } = source.Priority ?? string.Empty;
+    public string Location { get; } = source.Location ?? string.Empty;
 }
+
 
 public sealed class CoreGaugeItem
 {
