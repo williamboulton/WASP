@@ -1,7 +1,10 @@
 # Windows Analysis Service & Processor (W.A.S.P.)
 
-W.A.S.P. is a desktop monitoring app for Windows 11 that tracks and displays performance metrics in real-time.
+W.A.S.P. is a desktop monitoring app for Windows 11 that tracks and displays performance metrics in real-time. 
 
+This was originally developed in collaboration with others as the capstone project for my Master's Degree in Computer Science/Software Development. After completing the original project, I wanted to continue working on W.A.S.P. in my spare time. This fork contains my continued development of W.A.S.P.
+
+The original repository can be found at https://github.com/matt9527-marist/WASP.
 
 ## Download and Installation
 
