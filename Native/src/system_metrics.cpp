@@ -24,7 +24,8 @@
  * WINDOWS SERVICE MODE:
  *   Install: system_metrics.exe install   (requires admin)
  *   Remove:  system_metrics.exe remove
- *   When started by SCM, runs a loop writing metrics to JSON every 2 seconds.
+ *   When started by SCM, runs a loop writing metrics to JSON at the configured
+ *   refresh interval (default 2 seconds, clamped to 1-30 seconds).
  *
  * COMPILATION:
  *   cl /EHsc /W4 /std:c++17 /Fe:build\system_metrics.exe src\system_metrics.cpp ^
@@ -50,6 +51,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <iterator>
 
 #pragma comment(lib, "psapi.lib")
 #pragma comment(lib, "advapi32.lib")
@@ -77,7 +79,7 @@ typedef struct _PROCESSOR_POWER_INFORMATION {
 #define PDH_MORE_DATA ((PDH_STATUS)0x800007D2L)
 #endif
 
-/* Service name and poll interval (ms). ~2s between outputs (1s disk + 1s process sampling). */
+/* Service name and optional fallback poll interval (ms). */
 #define SVC_NAME          "SystemMetricsService"
 #define SVC_DISPLAY_NAME  "System Metrics (JSON poller)"
 #define METRICS_POLL_MS   0
@@ -911,6 +913,78 @@ static std::string GetServiceOutputPath() {
     return dir + "\\system_metrics_output.json";
 }
 
+static std::string GetSharedSettingsPath() {
+    const char* programData = std::getenv("ProgramData");
+    if (programData && programData[0] != '\0') {
+        std::string dir = std::string(programData) + "\\WASP";
+        CreateDirectoryA(dir.c_str(), nullptr);
+        return dir + "\\app_settings.json";
+    }
+
+    const char* localAppData = std::getenv("LOCALAPPDATA");
+    if (localAppData && localAppData[0] != '\0') {
+        std::string dir = std::string(localAppData) + "\\WASP";
+        CreateDirectoryA(dir.c_str(), nullptr);
+        return dir + "\\app_settings.json";
+    }
+
+    return GetExeDirectory() + "app_settings.json";
+}
+
+static DWORD ReadRefreshIntervalMs() {
+    constexpr double defaultSeconds = 2.0;
+    constexpr double minSeconds = 1.0;
+    constexpr double maxSeconds = 30.0;
+
+    std::ifstream in(GetSharedSettingsPath(), std::ios::in | std::ios::binary);
+    if (!in) {
+        return static_cast<DWORD>(defaultSeconds * 1000.0);
+    }
+
+    std::string content(
+        (std::istreambuf_iterator<char>(in)),
+        std::istreambuf_iterator<char>()
+    );
+    const std::string key = "\"refresh_interval_seconds\"";
+    const size_t keyPos = content.find(key);
+    if (keyPos == std::string::npos) {
+        return static_cast<DWORD>(defaultSeconds * 1000.0);
+    }
+
+    const size_t colonPos = content.find(':', keyPos + key.size());
+    if (colonPos == std::string::npos) {
+        return static_cast<DWORD>(defaultSeconds * 1000.0);
+    }
+
+    size_t valueStart = colonPos + 1;
+    while (valueStart < content.size() && std::isspace(static_cast<unsigned char>(content[valueStart]))) {
+        valueStart++;
+    }
+
+    size_t valueEnd = valueStart;
+    while (valueEnd < content.size()) {
+        const char ch = content[valueEnd];
+        if ((ch >= '0' && ch <= '9') || ch == '.') {
+            valueEnd++;
+            continue;
+        }
+        break;
+    }
+
+    if (valueEnd == valueStart) {
+        return static_cast<DWORD>(defaultSeconds * 1000.0);
+    }
+
+    try {
+        double parsed = std::stod(content.substr(valueStart, valueEnd - valueStart));
+        if (parsed < minSeconds) parsed = minSeconds;
+        if (parsed > maxSeconds) parsed = maxSeconds;
+        return static_cast<DWORD>(parsed * 1000.0);
+    } catch (...) {
+        return static_cast<DWORD>(defaultSeconds * 1000.0);
+    }
+}
+
 static VOID WINAPI SvcCtrlHandler(DWORD ctrl) {
     switch (ctrl) {
         case SERVICE_CONTROL_STOP:
@@ -955,8 +1029,15 @@ static void RunMetricsWriteLoop(const std::string& outPath, volatile LONG* stopF
     PrimeCpuReadings();
     Sleep(500);
     while (InterlockedCompareExchange(stopFlag, 0, 0) == 0) {
+        const ULONGLONG startedAt = GetTickCount64();
         CollectAndWriteMetricsSnapshot(outPath);
-        Sleep(METRICS_POLL_MS);
+        const ULONGLONG elapsedMs = GetTickCount64() - startedAt;
+        const DWORD targetMs = ReadRefreshIntervalMs();
+        if (elapsedMs < targetMs) {
+            Sleep(static_cast<DWORD>(targetMs - elapsedMs));
+        } else if (METRICS_POLL_MS > 0) {
+            Sleep(METRICS_POLL_MS);
+        }
     }
 }
 

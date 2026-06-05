@@ -40,8 +40,15 @@ if program_data:
     JSON_CANDIDATES.append(os.path.join(program_data, "WASP", "system_metrics_output.json"))
 
 local_app_data = os.environ.get("LOCALAPPDATA")
+SETTINGS_CANDIDATES = []
 if local_app_data:
     JSON_CANDIDATES.append(os.path.join(local_app_data, "WASP", "system_metrics_output.json"))
+    SETTINGS_CANDIDATES.append(os.path.join(local_app_data, "WASP", "app_settings.json"))
+
+if program_data:
+    SETTINGS_CANDIDATES.append(os.path.join(program_data, "WASP", "app_settings.json"))
+
+SETTINGS_CANDIDATES.append(os.path.join(BASE_DIR, "app_settings.json"))
 
 
 def resolve_json_path():
@@ -56,7 +63,29 @@ def resolve_json_path():
     # Fall back to the most common local dev path so error logs are intuitive.
     return JSON_CANDIDATES[0]
 # How often to push a fresh snapshot to the backend, in seconds.
-SEND_INTERVAL_SECONDS = 2.0
+DEFAULT_SEND_INTERVAL_SECONDS = 2.0
+ENV_SEND_INTERVAL_SECONDS = os.environ.get("WASP_SEND_INTERVAL_SECONDS")
+
+
+def resolve_send_interval_seconds():
+    """Resolve send interval from env override or shared app settings file."""
+    if ENV_SEND_INTERVAL_SECONDS:
+        try:
+            return max(1.0, min(30.0, float(ENV_SEND_INTERVAL_SECONDS)))
+        except ValueError:
+            pass
+
+    for candidate in SETTINGS_CANDIDATES:
+        try:
+            with open(candidate, "r", encoding="utf-8") as f:
+                settings = json.load(f)
+            value = settings.get("refresh_interval_seconds")
+            if isinstance(value, (int, float)):
+                return max(1.0, min(30.0, float(value)))
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            continue
+
+    return DEFAULT_SEND_INTERVAL_SECONDS
 
 
 def normalize_timestamp_to_epoch_ms(value):
@@ -162,7 +191,7 @@ async def relay_metrics():
                     except Exception as e:
                         print("Error reading/sending metrics:", e)
 
-                    await asyncio.sleep(SEND_INTERVAL_SECONDS)
+                    await asyncio.sleep(resolve_send_interval_seconds())
 
         except Exception as e:
             print("WebSocket connection error, retrying in 5s:", e)

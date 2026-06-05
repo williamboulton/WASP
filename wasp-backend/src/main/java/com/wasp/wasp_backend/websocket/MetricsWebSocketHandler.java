@@ -324,6 +324,15 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
       JsonNode processesNode = root.path("processes");
       boolean hasProcesses = !processesNode.isMissingNode() && !processesNode.isNull();
 
+      log.info(
+        "Received metrics payload from session={} bytes={} cores={} disks={} processes={}",
+        session.getId(),
+        rawJson.length(),
+        cpuCoresNode.isArray() ? cpuCoresNode.size() : 0,
+        diskNode.isArray() ? diskNode.size() : 0,
+        hasProcesses && processesNode.isArray() ? processesNode.size() : 0
+      );
+
       // validation occurs after relay to reduce overhead
       validateMetricData(cpuNode, cpuCoresNode, memoryNode, diskNode, processesNode);
 
