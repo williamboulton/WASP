@@ -13,6 +13,8 @@ public partial class App : Application
 {
     private Window? _window;
     public MetricsState MetricsState { get; } = new();
+    public NotificationCenter NotificationCenter { get; } = new();
+    private string _lastConnectionNotification = string.Empty;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -29,9 +31,42 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        MetricsState.ConnectionStatusChanged += MetricsStateOnConnectionStatusChanged;
         MetricsState.Start();
         _window = new MainWindow();
-        _window.Closed += (_, _) => MetricsState.Dispose();
+        NotificationCenter.InitializeDispatcher(_window.DispatcherQueue);
+        _window.Closed += (_, _) =>
+        {
+            MetricsState.ConnectionStatusChanged -= MetricsStateOnConnectionStatusChanged;
+            MetricsState.Dispose();
+        };
         _window.Activate();
+    }
+
+    private void MetricsStateOnConnectionStatusChanged(object? sender, string status)
+    {
+        if (_lastConnectionNotification == status)
+        {
+            return;
+        }
+
+        _lastConnectionNotification = status;
+
+        if (status.Equals("Connected", StringComparison.OrdinalIgnoreCase))
+        {
+            NotificationCenter.Notify(NotificationSeverity.Info, "Backend Connection", "Connected to backend.");
+            return;
+        }
+
+        if (status.Contains("Disconnected", StringComparison.OrdinalIgnoreCase))
+        {
+            NotificationCenter.Notify(NotificationSeverity.Error, "Backend Connection", status);
+            return;
+        }
+
+        if (status.Contains("Error", StringComparison.OrdinalIgnoreCase))
+        {
+            NotificationCenter.Notify(NotificationSeverity.Error, "Backend Connection", status);
+        }
     }
 }

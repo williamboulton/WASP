@@ -2,6 +2,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WaspDesktop.Pages;
+using WaspDesktop.Services;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -10,6 +11,11 @@ namespace WaspDesktop;
 
 public sealed partial class MainWindow : Window
 {
+    public System.Collections.ObjectModel.ObservableCollection<AppNotification> ActiveToasts =>
+        ((App)Application.Current).NotificationCenter.ActiveToasts;
+    public System.Collections.ObjectModel.ObservableCollection<AppNotification> NotificationHistory =>
+        ((App)Application.Current).NotificationCenter.History;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -57,5 +63,10 @@ public sealed partial class MainWindow : Window
                     throw new InvalidOperationException($"Unknown navigation item tag: {item.Tag}");
             }
         }
+    }
+
+    private void ClearNotifications_Click(object sender, RoutedEventArgs e)
+    {
+        ((App)Application.Current).NotificationCenter.ClearHistory();
     }
 }

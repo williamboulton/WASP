@@ -11,3 +11,4 @@ wasp-backend/src/main/resources/static/
 output/
 system_metrics_output.json
 Native/metrics/system_metrics_output.json
+WASP_ROADMAP.md

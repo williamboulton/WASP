@@ -10,6 +10,7 @@ public sealed class MetricsState : IDisposable
     public string ConnectionStatus { get; private set; } = "Connecting...";
 
     public event EventHandler? Changed;
+    public event EventHandler<string>? ConnectionStatusChanged;
 
     public MetricsState()
     {
@@ -21,7 +22,13 @@ public sealed class MetricsState : IDisposable
 
         _stream.ConnectionStatusChanged += (_, status) =>
         {
+            if (ConnectionStatus == status)
+            {
+                return;
+            }
+
             ConnectionStatus = status;
+            ConnectionStatusChanged?.Invoke(this, status);
             Changed?.Invoke(this, EventArgs.Empty);
         };
     }
