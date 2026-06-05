@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import tools.jackson.databind.ObjectMapper;
@@ -25,17 +26,16 @@ class ValidJson{
   @Mock
   private WebSocketSession session;
 
+  @Mock
+  private ApplicationEventPublisher eventPublisher;
+
   private ObjectMapper objectMapper;
   private MetricsWebSocketHandler handler;
-
-  private MetricsAggregationService service() {
-    return new MetricsAggregationService(mock(MetricRepository.class), 10, 60);
-  }
 
   @BeforeEach
   void setUp() {
     objectMapper = new ObjectMapper();
-    handler = new MetricsWebSocketHandler(objectMapper, metricsAggregationService);
+    handler = new MetricsWebSocketHandler(objectMapper, metricsAggregationService, eventPublisher);
   }
 
   @Test

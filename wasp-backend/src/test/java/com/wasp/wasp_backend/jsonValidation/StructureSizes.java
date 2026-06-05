@@ -9,6 +9,7 @@ import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
 import com.wasp.wasp_backend.repository.MetricRepository;
 import com.wasp.wasp_backend.service.MetricsAggregationService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -17,7 +18,12 @@ import java.util.List;
 class StructureSizes {
 
   private MetricsAggregationService service() {
-    return new MetricsAggregationService(mock(MetricRepository.class), 10, 60);
+    return new MetricsAggregationService(
+      mock(MetricRepository.class),
+      mock(ApplicationEventPublisher.class),
+      10,
+      60
+    );
   }
 
   @Test
