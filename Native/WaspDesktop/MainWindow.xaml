@@ -78,8 +78,12 @@
                 </StackPanel>
                 <Button.Flyout>
                     <Flyout Placement="BottomEdgeAlignedRight">
-                        <StackPanel Width="420" MaxHeight="460" Spacing="10">
-                            <Grid>
+                        <Grid Width="420" MaxHeight="460" RowSpacing="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Grid.Row="0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
@@ -88,7 +92,12 @@
                                 <Button Grid.Column="1" Content="Clear" Click="ClearNotifications_Click" />
                             </Grid>
 
-                            <ListView ItemsSource="{x:Bind NotificationHistory, Mode=OneWay}">
+                            <ListView
+                                Grid.Row="1"
+                                MaxHeight="380"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                ScrollViewer.VerticalScrollMode="Enabled"
+                                ItemsSource="{x:Bind NotificationHistory, Mode=OneWay}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="services:AppNotification">
                                         <Border
@@ -110,7 +119,7 @@
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-                        </StackPanel>
+                        </Grid>
                     </Flyout>
                 </Button.Flyout>
             </Button>

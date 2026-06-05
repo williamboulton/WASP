@@ -18,7 +18,7 @@ public sealed class AppNotification
     public DateTimeOffset Timestamp { get; } = DateTimeOffset.Now;
     public string TimeText => Timestamp.ToString("HH:mm:ss");
     public NotificationSeverity Severity { get; }
-    public string SeverityText => Severity.ToString().ToUpperInvariant();
+    public string SeverityText => $"[{Severity.ToString().ToUpperInvariant()}]";
     public string Title { get; }
     public string Message { get; }
 
