@@ -76,7 +76,9 @@ public partial class App : Application
 
     private void MetricsStateOnBackendNotificationReceived(object? sender, BackendNotification notification)
     {
-        if (!Settings.ExtraNotificationsEnabled)
+        var category = notification.Category ?? string.Empty;
+        var alwaysShow = category.Equals("connection", StringComparison.OrdinalIgnoreCase);
+        if (!alwaysShow && !Settings.ExtraNotificationsEnabled)
         {
             return;
         }

@@ -8,6 +8,7 @@ import com.wasp.wasp_backend.dto.ProcessData;
 import com.wasp.wasp_backend.event.BackendNotificationEvent;
 import com.wasp.wasp_backend.exception.JsonProcessingException;
 import com.wasp.wasp_backend.service.MetricsAggregationService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,19 +44,38 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
   private final Set<WebSocketSession> sessions =
     ConcurrentHashMap.newKeySet();
   private final MetricsAggregationService metricsAggregationService;
+  private final ApplicationEventPublisher eventPublisher;
 
   private static final Logger log =
     LoggerFactory.getLogger(MetricsWebSocketHandler.class);
 
-  public MetricsWebSocketHandler(ObjectMapper objectMapper, MetricsAggregationService metricsAggregationService) {
+  public MetricsWebSocketHandler(
+    ObjectMapper objectMapper,
+    MetricsAggregationService metricsAggregationService,
+    ApplicationEventPublisher eventPublisher
+  ) {
     this.objectMapper = objectMapper;
     this.metricsAggregationService = metricsAggregationService;
+    this.eventPublisher = eventPublisher;
   }
 
   @Override
   public void afterConnectionEstablished(WebSocketSession session) {
     sessions.add(session);
     System.out.println("Connected: " + session.getId());
+
+    String userAgent = session.getHandshakeHeaders().getFirst("User-Agent");
+    boolean senderClient = userAgent != null && userAgent.toLowerCase().contains("python");
+    if (senderClient) {
+      eventPublisher.publishEvent(
+        new BackendNotificationEvent(
+          "info",
+          "connection",
+          "Metrics Sender Connected",
+          "Metrics sender connected to backend"
+        )
+      );
+    }
   }
 
   @Override
@@ -63,6 +83,32 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
     WebSocketSession session, CloseStatus status) {
     sessions.remove(session);
     System.out.println("Disconnected: " + session.getId());
+
+    String reason = status != null ? status.getReason() : null;
+    String userAgent = session.getHandshakeHeaders().getFirst("User-Agent");
+    boolean senderClient = userAgent != null && userAgent.toLowerCase().contains("python");
+    String title = senderClient ? "Metrics Sender Disconnected" : "Backend Client Disconnected";
+    String message;
+    if (senderClient) {
+      message = "Metrics sender disconnected from backend";
+      if (reason != null && !reason.isBlank()) {
+        message += " (" + reason + ")";
+      }
+    } else {
+      message = "A WebSocket client disconnected";
+      if (reason != null && !reason.isBlank()) {
+        message += " (" + reason + ")";
+      }
+    }
+
+    eventPublisher.publishEvent(
+      new BackendNotificationEvent(
+        "error",
+        "connection",
+        title,
+        message
+      )
+    );
   }
 
   public void sendToAll(String json) {
