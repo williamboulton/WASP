@@ -65,7 +65,6 @@ public sealed partial class HomePage : Page
         }
 
         var snapshot = _metricsState.LatestSnapshot;
-        ConnectionStatusText.Text = _metricsState.ConnectionStatus;
         CpuUsageText.Text = Formatters.Percent(snapshot?.Cpu?.CpuUsagePercent);
         CpuClockText.Text = Formatters.ClockSpeed(snapshot?.Cpu?.CpuMhz);
         ResponsivenessText.Text = Formatters.Percent(snapshot?.Cpu?.SystemResponsivenessPercent);

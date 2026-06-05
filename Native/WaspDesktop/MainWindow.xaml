@@ -95,9 +95,21 @@
                             <ListView
                                 Grid.Row="1"
                                 MaxHeight="380"
+                                SelectionMode="None"
+                                IsItemClickEnabled="False"
+                                IsTabStop="False"
                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
                                 ScrollViewer.VerticalScrollMode="Enabled"
                                 ItemsSource="{x:Bind NotificationHistory, Mode=OneWay}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="IsHitTestVisible" Value="False" />
+                                        <Setter Property="AllowFocusOnInteraction" Value="False" />
+                                        <Setter Property="UseSystemFocusVisuals" Value="False" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
                                 <ListView.ItemTemplate>
                                     <DataTemplate x:DataType="services:AppNotification">
                                         <Border
@@ -143,7 +155,7 @@
                             CornerRadius="8"
                             BorderThickness="1"
                             BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                            Background="{ThemeResource LayerFillColorDefaultBrush}">
+                            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}">
                             <StackPanel Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind TimeText}" />
