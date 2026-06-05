@@ -41,6 +41,7 @@ public sealed partial class MainWindow : Window
     {
         if (args.IsSettingsSelected)
         {
+            NavFrame.Navigate(typeof(SettingsPage));
             return;
         }
         else if (args.SelectedItem is NavigationViewItem item)

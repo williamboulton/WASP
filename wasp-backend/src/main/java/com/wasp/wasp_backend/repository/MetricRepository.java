@@ -27,6 +27,9 @@ public class MetricRepository {
 
   private final JdbcTemplate jdbc;
 
+  public record WriteSummary(int upsertedRows, int prunedRows) {
+  }
+
   public MetricRepository(JdbcTemplate jdbc){
     this.jdbc = jdbc;
   }
@@ -45,7 +48,7 @@ public class MetricRepository {
     );
   }
 
-  public void insertCpu(String timestamp, double cpuMhz, double cpuUsagePercent) {
+  public WriteSummary insertCpu(String timestamp, double cpuMhz, double cpuUsagePercent) {
     long timestampMs = parseTimestampMillis(timestamp);
     double cpuGhz = round(cpuMhz / 1000.0);
     int rowsUpdated = jdbc.update(
@@ -55,10 +58,11 @@ public class MetricRepository {
       round(cpuUsagePercent)
     );
     log.debug("Upserted {} row(s) into cpu for timestamp_ms={}", rowsUpdated, timestampMs);
-    pruneTableOlderThan("cpu", timestampMs);
+    int prunedRows = pruneTableOlderThan("cpu", timestampMs);
+    return new WriteSummary(rowsUpdated, prunedRows);
   }
 
-  public void insertCpuCore(String timestamp, int coreIndex, double coreMhz, double coreUsagePercent) {
+  public WriteSummary insertCpuCore(String timestamp, int coreIndex, double coreMhz, double coreUsagePercent) {
     long timestampMs = parseTimestampMillis(timestamp);
     double coreGhz = round(coreMhz / 1000.0);
     int rowsUpdated = jdbc.update(
@@ -74,10 +78,11 @@ public class MetricRepository {
       timestampMs,
       coreIndex
     );
-    pruneTableOlderThan("cpu_cores", timestampMs);
+    int prunedRows = pruneTableOlderThan("cpu_cores", timestampMs);
+    return new WriteSummary(rowsUpdated, prunedRows);
   }
 
-  public void insertMemory(String timestamp, double totalBytes, double freeBytes, double usedBytes,
+  public WriteSummary insertMemory(String timestamp, double totalBytes, double freeBytes, double usedBytes,
                            double memoryUsagePercent, double pageFaults) {
     long timestampMs = parseTimestampMillis(timestamp);
     int rowsUpdated = jdbc.update(
@@ -90,10 +95,11 @@ public class MetricRepository {
       Math.round(pageFaults)
     );
     log.debug("Upserted {} row(s) into memory for timestamp_ms={}", rowsUpdated, timestampMs);
-    pruneTableOlderThan("memory", timestampMs);
+    int prunedRows = pruneTableOlderThan("memory", timestampMs);
+    return new WriteSummary(rowsUpdated, prunedRows);
   }
 
-  public void insertDisk(String timestamp, String driveLetter, double totalSpace, double freeSpace,
+  public WriteSummary insertDisk(String timestamp, String driveLetter, double totalSpace, double freeSpace,
                          double readSpeed, double writeSpeed) {
     long timestampMs = parseTimestampMillis(timestamp);
     int rowsUpdated = jdbc.update(
@@ -111,10 +117,11 @@ public class MetricRepository {
       timestampMs,
       driveLetter
     );
-    pruneTableOlderThan("disk", timestampMs);
+    int prunedRows = pruneTableOlderThan("disk", timestampMs);
+    return new WriteSummary(rowsUpdated, prunedRows);
   }
 
-  public void insertProcess(String timestamp, int pid, String name, String owner, String priority,
+  public WriteSummary insertProcess(String timestamp, int pid, String name, String owner, String priority,
                             double cpuPercent, long cpuTime100ns, double memPercent, String location) {
     long timestampMs = parseTimestampMillis(timestamp);
     int rowsUpdated = jdbc.update(
@@ -135,7 +142,8 @@ public class MetricRepository {
       timestampMs,
       pid
     );
-    pruneTableOlderThan("processes", timestampMs);
+    int prunedRows = pruneTableOlderThan("processes", timestampMs);
+    return new WriteSummary(rowsUpdated, prunedRows);
   }
 
   private long parseTimestampMillis(String timestamp) {
@@ -198,10 +206,10 @@ public class MetricRepository {
     }
   }
 
-  private void pruneTableOlderThan(String tableName, long referenceTimestampMs) {
+  private int pruneTableOlderThan(String tableName, long referenceTimestampMs) {
     long cutoffTimestampMs = referenceTimestampMs - RETENTION_WINDOW_MS;
     if (cutoffTimestampMs <= 0) {
-      return;
+      return 0;
     }
     int deletedRows = jdbc.update("DELETE FROM " + tableName + " WHERE timestamp_ms < ?", cutoffTimestampMs);
     if (deletedRows > 0) {
@@ -212,5 +220,6 @@ public class MetricRepository {
         cutoffTimestampMs
       );
     }
+    return deletedRows;
   }
 }

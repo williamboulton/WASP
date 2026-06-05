@@ -5,8 +5,10 @@ import com.wasp.wasp_backend.dto.CpuData;
 import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
 import com.wasp.wasp_backend.dto.ProcessData;
+import com.wasp.wasp_backend.event.BackendNotificationEvent;
 import com.wasp.wasp_backend.exception.JsonProcessingException;
 import com.wasp.wasp_backend.service.MetricsAggregationService;
+import org.springframework.context.event.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -72,6 +74,21 @@ public class MetricsWebSocketHandler extends TextWebSocketHandler {
           e.printStackTrace();
         }
       }
+    }
+  }
+
+  @EventListener
+  public void onBackendNotification(BackendNotificationEvent event) {
+    try {
+      Map<String, Object> payload = new HashMap<>();
+      payload.put("type", "backend_notification");
+      payload.put("severity", event.severity());
+      payload.put("category", event.category());
+      payload.put("title", event.title());
+      payload.put("message", event.message());
+      sendToAll(objectMapper.writeValueAsString(payload));
+    } catch (Exception e) {
+      log.warn("Failed to broadcast backend notification event", e);
     }
   }
 

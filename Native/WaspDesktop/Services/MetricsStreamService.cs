@@ -14,6 +14,7 @@ public sealed class MetricsStreamService : IDisposable
     private Task? _backgroundTask;
 
     public event EventHandler<MetricsSnapshot>? SnapshotReceived;
+    public event EventHandler<BackendNotification>? BackendNotificationReceived;
     public event EventHandler<string>? ConnectionStatusChanged;
 
     public void Start()
@@ -77,8 +78,30 @@ public sealed class MetricsStreamService : IDisposable
             } while (!result.EndOfMessage);
 
             var json = Encoding.UTF8.GetString(payload.ToArray());
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            if (root.TryGetProperty("type", out var typeNode) &&
+                typeNode.ValueKind == JsonValueKind.String &&
+                string.Equals(typeNode.GetString(), "backend_notification", StringComparison.OrdinalIgnoreCase))
+            {
+                var notification = new BackendNotification
+                {
+                    Severity = root.TryGetProperty("severity", out var severityNode) ? severityNode.GetString() ?? "info" : "info",
+                    Category = root.TryGetProperty("category", out var categoryNode) ? categoryNode.GetString() ?? "general" : "general",
+                    Title = root.TryGetProperty("title", out var titleNode) ? titleNode.GetString() ?? "Backend" : "Backend",
+                    Message = root.TryGetProperty("message", out var messageNode) ? messageNode.GetString() ?? string.Empty : string.Empty
+                };
+                BackendNotificationReceived?.Invoke(this, notification);
+                continue;
+            }
+
             var snapshot = JsonSerializer.Deserialize<MetricsSnapshot>(json, _jsonOptions);
-            if (snapshot is not null)
+            if (snapshot is not null && (snapshot.Cpu is not null || snapshot.Memory is not null || snapshot.Disk is not null || snapshot.CpuCores is not null || snapshot.Processes is not null))
             {
                 SnapshotReceived?.Invoke(this, snapshot);
             }

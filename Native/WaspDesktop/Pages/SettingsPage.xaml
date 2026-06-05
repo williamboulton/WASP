@@ -4,16 +4,35 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:WaspDesktop.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Padding="24,16,24,16" RowSpacing="24">
+    <Grid Padding="24,16,24,16" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Settings" />
-        <TextBlock Grid.Row="1" Text="This is the Settings page" />
+
+        <Border Grid.Row="1" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <StackPanel Spacing="8">
+                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Refresh Interval" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Controls how often the UI updates from incoming metrics." />
+                <ComboBox x:Name="RefreshIntervalCombo" SelectionChanged="RefreshIntervalCombo_SelectionChanged">
+                    <ComboBoxItem Content="1 second" Tag="1" />
+                    <ComboBoxItem Content="2 seconds" Tag="2" />
+                    <ComboBoxItem Content="5 seconds" Tag="5" />
+                </ComboBox>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Padding="12" CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <StackPanel Spacing="8">
+                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Extra Notifications" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Show backend database activity summaries as notifications." />
+                <ToggleSwitch x:Name="ExtraNotificationsToggle" Header="Enable extra notifications" Toggled="ExtraNotificationsToggle_Toggled" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>

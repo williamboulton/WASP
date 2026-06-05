@@ -12,7 +12,8 @@ namespace WaspDesktop;
 public partial class App : Application
 {
     private Window? _window;
-    public MetricsState MetricsState { get; } = new();
+    public AppSettingsService Settings { get; } = new();
+    public MetricsState MetricsState { get; }
     public NotificationCenter NotificationCenter { get; } = new();
     private string _lastConnectionNotification = string.Empty;
 
@@ -23,6 +24,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        MetricsState = new MetricsState(Settings);
     }
 
     /// <summary>
@@ -32,12 +34,14 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         MetricsState.ConnectionStatusChanged += MetricsStateOnConnectionStatusChanged;
+        MetricsState.BackendNotificationReceived += MetricsStateOnBackendNotificationReceived;
         MetricsState.Start();
         _window = new MainWindow();
         NotificationCenter.InitializeDispatcher(_window.DispatcherQueue);
         _window.Closed += (_, _) =>
         {
             MetricsState.ConnectionStatusChanged -= MetricsStateOnConnectionStatusChanged;
+            MetricsState.BackendNotificationReceived -= MetricsStateOnBackendNotificationReceived;
             MetricsState.Dispose();
         };
         _window.Activate();
@@ -68,5 +72,23 @@ public partial class App : Application
         {
             NotificationCenter.Notify(NotificationSeverity.Error, "Backend Connection", status);
         }
+    }
+
+    private void MetricsStateOnBackendNotificationReceived(object? sender, BackendNotification notification)
+    {
+        if (!Settings.ExtraNotificationsEnabled)
+        {
+            return;
+        }
+
+        var severity = notification.Severity.ToLowerInvariant() switch
+        {
+            "error" => NotificationSeverity.Error,
+            "warning" => NotificationSeverity.Warning,
+            "success" => NotificationSeverity.Success,
+            _ => NotificationSeverity.Info
+        };
+
+        NotificationCenter.Notify(severity, notification.Title, notification.Message);
     }
 }

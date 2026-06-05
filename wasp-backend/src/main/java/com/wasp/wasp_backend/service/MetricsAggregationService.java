@@ -5,9 +5,11 @@ import com.wasp.wasp_backend.dto.CpuData;
 import com.wasp.wasp_backend.dto.DiskData;
 import com.wasp.wasp_backend.dto.MemoryData;
 import com.wasp.wasp_backend.dto.ProcessData;
+import com.wasp.wasp_backend.event.BackendNotificationEvent;
 import com.wasp.wasp_backend.repository.MetricRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
@@ -40,18 +42,21 @@ public class MetricsAggregationService {
   private List<ProcessData> latestProcessSnapshot = List.of();
 
   private final MetricRepository metricRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
-  public MetricsAggregationService(MetricRepository metricRepository) {
-    this(metricRepository, 60, 1);
+  public MetricsAggregationService(MetricRepository metricRepository, ApplicationEventPublisher eventPublisher) {
+    this(metricRepository, eventPublisher, 60, 1);
   }
 
   @Autowired
   public MetricsAggregationService(
     MetricRepository metricRepository,
+    ApplicationEventPublisher eventPublisher,
     @Value("${wasp.aggregation.metrics-window-size:60}") int metricsWindowSize,
     @Value("${wasp.aggregation.process-window-size:1}") int processWindowSize
   ) {
     this.metricRepository = metricRepository;
+    this.eventPublisher = eventPublisher;
     this.metricsWindowSize = Math.max(1, metricsWindowSize);
     this.processWindowSize = Math.max(1, processWindowSize);
   }
@@ -157,13 +162,18 @@ public class MetricsAggregationService {
    *
    * @author Patrick Muller
    */
-  private void emitAggregatedMetrics() {
+  private WriteStats emitAggregatedMetrics() {
+    int upsertedRows = 0;
+    int prunedRows = 0;
+
     double aggCpuMhz = avg(runningCpuTotals.getCpu_mhz());
     double aggCpuUsage = avg(runningCpuTotals.getCpu_usage_percent());
     double aggCpuSystemResp = avg(runningCpuTotals.getSystem_responsiveness_percent());
 
     // Persist CPU aggregate to DB
-    metricRepository.insertCpu(runningCpuTotals.getTimestamp(), aggCpuMhz, aggCpuUsage);
+    var cpuSummary = metricRepository.insertCpu(runningCpuTotals.getTimestamp(), aggCpuMhz, aggCpuUsage);
+    upsertedRows += cpuSummary.upsertedRows();
+    prunedRows += cpuSummary.prunedRows();
 
     Map<String, Object> root = new HashMap<>();
     Map<String, Object> cpu = new HashMap<>();
@@ -179,12 +189,14 @@ public class MetricsAggregationService {
       double aggCpuCoreUsage = avg(core.getCore_usage_percent());
 
       // Persist per-core aggregate to DB
-      metricRepository.insertCpuCore(
+      var cpuCoreSummary = metricRepository.insertCpuCore(
         core.getTimestamp(),
         core.getCore_index(),
         aggCpuCoreMhz,
         aggCpuCoreUsage
       );
+      upsertedRows += cpuCoreSummary.upsertedRows();
+      prunedRows += cpuCoreSummary.prunedRows();
 
       Map<String, Object> coreMap = new HashMap<>();
       coreMap.put("core_index", core.getCore_index());
@@ -202,7 +214,7 @@ public class MetricsAggregationService {
     double aggMemPageFaultCount = avg((double) runningMemTotals.getPage_fault_count());
 
     // Persist memory aggregate to DB
-    metricRepository.insertMemory(
+    var memorySummary = metricRepository.insertMemory(
       runningMemTotals.getTimestamp(),
       aggMemTotalBytes,
       aggMemFreeBytes,
@@ -210,6 +222,8 @@ public class MetricsAggregationService {
       aggMemUsagePercent,
       aggMemPageFaultCount
     );
+    upsertedRows += memorySummary.upsertedRows();
+    prunedRows += memorySummary.prunedRows();
 
     Map<String, Object> memory = new HashMap<>();
     memory.put("total_bytes", aggMemTotalBytes);
@@ -228,7 +242,7 @@ public class MetricsAggregationService {
       double aggDiskWriteSpeed = avg(disk.getWrite_speed_bytes_per_sec());
 
       // Persist disk aggregate to DB
-      metricRepository.insertDisk(
+      var diskSummary = metricRepository.insertDisk(
         disk.getTimestamp(),
         disk.getDrive_letter(),
         aggDiskTotalBytes,
@@ -236,6 +250,8 @@ public class MetricsAggregationService {
         aggDiskReadSpeed,
         aggDiskWriteSpeed
       );
+      upsertedRows += diskSummary.upsertedRows();
+      prunedRows += diskSummary.prunedRows();
 
       Map<String, Object> diskMap = new HashMap<>();
       diskMap.put("drive", disk.getDrive_letter());
@@ -262,6 +278,8 @@ public class MetricsAggregationService {
     } catch (Exception e) {
       e.printStackTrace();
     }
+
+    return new WriteStats(upsertedRows, prunedRows);
   }
 
   /**
@@ -275,9 +293,11 @@ public class MetricsAggregationService {
     return Math.round(total / metricsSampleCount * 100.0) / 100.0;
   }
 
-  private void persistProcesses(List<ProcessData> processData) {
+  private WriteStats persistProcesses(List<ProcessData> processData) {
+    int upsertedRows = 0;
+    int prunedRows = 0;
     for (ProcessData process : processData) {
-      metricRepository.insertProcess(
+      var processSummary = metricRepository.insertProcess(
         process.getTimestamp(),
         process.getPid(),
         process.getName(),
@@ -288,7 +308,36 @@ public class MetricsAggregationService {
         process.getMem_percent(),
         process.getLocation()
       );
+      upsertedRows += processSummary.upsertedRows();
+      prunedRows += processSummary.prunedRows();
     }
+
+    return new WriteStats(upsertedRows, prunedRows);
+  }
+
+  private void emitDatabaseNotification(String title, WriteStats stats) {
+    if (stats.upsertedRows() <= 0 && stats.prunedRows() <= 0) {
+      return;
+    }
+
+    StringBuilder messageBuilder = new StringBuilder();
+    if (stats.upsertedRows() > 0) {
+      messageBuilder.append("Updated ")
+        .append(stats.upsertedRows())
+        .append(" row(s)");
+    }
+    if (stats.prunedRows() > 0) {
+      if (messageBuilder.length() > 0) {
+        messageBuilder.append(", ");
+      }
+      messageBuilder.append("pruned ")
+        .append(stats.prunedRows())
+        .append(" row(s)");
+    }
+
+    eventPublisher.publishEvent(
+      new BackendNotificationEvent("info", "database", title, messageBuilder.toString())
+    );
   }
 
 
@@ -347,13 +396,15 @@ public class MetricsAggregationService {
 
     // Emit metrics after window is full and reset count
     if (metricsSampleCount >= metricsWindowSize) {
-      emitAggregatedMetrics();
+      WriteStats aggregateStats = emitAggregatedMetrics();
+      emitDatabaseNotification("Database Update", aggregateStats);
       metricsSampleCount = 0;
     }
 
     // Persist latest process snapshot on a slower cadence.
     if (processSampleCount >= processWindowSize) {
-      persistProcesses(latestProcessSnapshot);
+      WriteStats processStats = persistProcesses(latestProcessSnapshot);
+      emitDatabaseNotification("Process Snapshot Saved", processStats);
       processSampleCount = 0;
     }
 
@@ -365,5 +416,8 @@ public class MetricsAggregationService {
   public void ingest(CpuData cpuData, List<CpuCoreData> cpuCoreData, MemoryData memoryData,
                      List<DiskData> diskData) {
     ingest(cpuData, cpuCoreData, memoryData, diskData, List.of());
+  }
+
+  private record WriteStats(int upsertedRows, int prunedRows) {
   }
 }
